@@ -1,0 +1,29 @@
+
+import Menu from "../components/Menu";
+import Mainimage from "../components/Mainimage";
+import Container1 from "../components/Container1";
+import Container2 from "../components/Container2";
+import SlidingBanner from "../components/SlidingBanner";
+import PopularThisWeek from "@/components/PouplarThisWeek";
+import ShopByPrice from "../components/ShopByPrice";
+import ShopByStyle from "@/components/ShopByStyle";
+import TheDepopEdit from "@/components/TheDepopEdit";
+import VerticalMenu from "@/components/VerticalMenu";
+
+export default function Home() {
+  return (
+    <>
+      <Menu />
+      <Mainimage />
+      <Container1/>
+      <Container2>
+        <SlidingBanner/>
+        <PopularThisWeek/>
+        <ShopByPrice/>
+        <ShopByStyle/>
+        <TheDepopEdit/>
+      </Container2>
+      <VerticalMenu/>
+    </>
+  );
+}
