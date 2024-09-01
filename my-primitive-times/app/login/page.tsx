@@ -1,8 +1,43 @@
-// pages/login.tsx
+// app/login/page.tsx
+'use client';
+
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useAppDispatch } from '../store/store';
+import { login } from '../store/store';
 
 const Login: React.FC = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    try {
+      const response = await axios.post('/api/auth/login', {
+        username,
+        password,
+      });
+
+      console.log('Login response:', response.data);
+
+      dispatch(login()); // Redux 상태 업데이트
+      router.push('/'); // 홈 페이지로 리다이렉트
+    } catch (error: any) {
+      setError(error.response?.data?.message || 'Something went wrong');
+    }
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = '/api/auth/google'; // Google OAuth 2.0 경로로 리다이렉트
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
       {/* Icon and Title */}
@@ -16,49 +51,36 @@ const Login: React.FC = () => {
         </p>
       </div>
 
-      {/* Login Options */}
-      <div className="w-full max-w-md bg-white shadow-md rounded-lg p-6">
-        {/* Continue with Google */}
-        <button className="w-full flex items-center justify-center py-2 px-4 mb-4 border border-gray-300 rounded-lg hover:bg-gray-100">
-          <Image
-            src="/icons/google-icon.png" // Google icon
-            alt="Google Icon"
-            width={24}
-            height={24}
-            className="mr-2"
-          />
-          Continue with Google
-        </button>
+      {/* Continue with Google */}
+      <button
+        onClick={handleGoogleLogin}
+        className="w-full flex items-center justify-center py-2 px-4 mb-4 border border-gray-300 rounded-lg hover:bg-gray-100"
+      >
+        <Image
+          src="/icons/google-icon.png"
+          alt="Google Icon"
+          width={24}
+          height={24}
+          className="mr-2"
+        />
+        Continue with Google
+      </button>
 
-        {/* Continue with Apple */}
-        <button className="w-full flex items-center justify-center py-2 px-4 mb-4 border border-gray-300 rounded-lg hover:bg-gray-100">
-          <Image
-            src="/icons/apple-icon.png" // Apple icon
-            alt="Apple Icon"
-            width={24}
-            height={24}
-            className="mr-2"
-          />
-          Continue with Apple
-        </button>
-
-        {/* Separator */}
-        <div className="flex items-center my-4">
-          <div className="flex-1 border-t border-gray-300"></div>
-          <span className="mx-4 text-gray-500">or</span>
-          <div className="flex-1 border-t border-gray-300"></div>
-        </div>
-
-        {/* Email or Username */}
+      {/* Login Form */}
+      <form onSubmit={handleSubmit} className="w-full max-w-md bg-white shadow-md rounded-lg p-6">
+        {/* Username or Email */}
         <div className="mb-4">
-          <label htmlFor="usernameOrEmail" className="block text-sm font-medium text-gray-700 mb-1">
-            Email or Username
+          <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+            Username or Email
           </label>
           <input
             type="text"
-            id="usernameOrEmail"
-            placeholder="Enter your email or username"
+            id="username"
+            placeholder="Enter your username or email"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+            required
           />
         </div>
 
@@ -71,7 +93,10 @@ const Login: React.FC = () => {
             type="password"
             id="password"
             placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+            required
           />
         </div>
 
@@ -83,10 +108,14 @@ const Login: React.FC = () => {
         </div>
 
         {/* Log In Button */}
-        <button className="w-full py-2 px-4 border border-black text-black rounded-lg font-bold hover:bg-gray-100">
+        <button
+          type="submit"
+          className="w-full py-2 px-4 border border-black bg-black text-white font-bold rounded-lg hover:bg-gray-900"
+        >
           Log In
         </button>
-      </div>
+        {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+      </form>
     </div>
   );
 };

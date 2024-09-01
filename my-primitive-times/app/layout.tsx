@@ -1,8 +1,11 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import store from './store/store'; // store 경로 설정
+import { Providers } from './providers';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -13,18 +16,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
+    <Providers>
     <html lang="en">
       <body className={inter.className}>
-        <Navbar/>
-        <main>
-          {children}
-        </main>
-      <Footer/>
+          <Navbar />
+          <main>{children}</main>
+          <Footer />
       </body>
     </html>
+    </Providers>
   );
 }

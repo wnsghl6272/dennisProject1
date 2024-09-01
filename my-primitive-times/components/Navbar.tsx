@@ -1,10 +1,34 @@
 // components/Navbar.tsx
 'use client';
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation'; // Correct import for Client Components
+import Link from 'next/link';
+import axios from 'axios';
+import { useAppDispatch, useAppSelector } from '../app/store/store'; // Ensure correct path
+import { login, logout } from '../app/store/store'; // Ensure correct path
 
 const Navbar: React.FC = () => {
   const router = useRouter();
+  const isLogin = useAppSelector((state) => state.auth.isLogin);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const response = await axios.get('/api/auth/check');
+        if (response.data.isLogin) {
+          dispatch(login());
+        } else {
+          dispatch(logout());
+        }
+      } catch (error) {
+        dispatch(logout());
+      }
+    };
+
+    checkAuthStatus();
+  }, [dispatch]);
 
   const handleNavigation = (path: string) => {
     router.push(path);
@@ -49,24 +73,37 @@ const Navbar: React.FC = () => {
               />
             </li>
           </ul>
+
           <button
             onClick={() => handleNavigation('/sell-now')}
             className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800"
           >
             Sell Now
           </button>
-          <button
-            onClick={() => handleNavigation('/signup')}
-            className="px-4 py-2 border border-black text-black rounded-lg hover:bg-gray-100"
-          >
-            Sign Up
-          </button>
-          <button
-            onClick={() => handleNavigation('/login')}
-            className="px-4 py-2 text-black"
-          >
-            Log In
-          </button>
+
+          {isLogin ? (
+            <button
+              onClick={() => handleNavigation('/logout')}
+              className="px-4 py-2 text-red-500"
+            >
+              Logout
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => handleNavigation('/signup')}
+                className="px-4 py-2 border border-black text-black rounded-lg hover:bg-gray-100"
+              >
+                Sign Up
+              </button>
+              <button
+                onClick={() => handleNavigation('/login')}
+                className="px-4 py-2 text-black"
+              >
+                Log In
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

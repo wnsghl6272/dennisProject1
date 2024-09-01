@@ -1,13 +1,25 @@
 // pages/signup-email.tsx
 'use client';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 const SignUpEmail: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [emailValid, setEmailValid] = useState(true); // Default to true for initial load
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [passwordValid, setPasswordValid] = useState(false);
+  const [usernameValid, setUsernameValid] = useState(true);
+  const router = useRouter();
+
+  // Validate username function
+  const validateUsername = (username: string) => {
+    const pattern = /^[a-zA-Z0-9]{1,15}$/;
+    return pattern.test(username);
+  };
 
   // Validate password function
   const validatePassword = (password: string) => {
@@ -15,24 +27,40 @@ const SignUpEmail: React.FC = () => {
     return pattern.test(password);
   };
 
-  // Validate email to allow common formats
-  const validateEmail = (email: string) => {
-    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return pattern.test(email);
-  };
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
 
-  // Handle email input change
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newEmail = e.target.value;
-    setEmail(newEmail);
-    setEmailValid(validateEmail(newEmail));
-  };
+    // Validate username and password before making API call
+    if (!validateUsername(username)) {
+      setUsernameValid(false);
+      return;
+    }
+    setUsernameValid(true);
 
-  // Handle password input change
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newPassword = e.target.value;
-    setPassword(newPassword);
-    setPasswordValid(validatePassword(newPassword));
+    if (!validatePassword(password)) {
+      setPasswordValid(false);
+      return;
+    }
+    setPasswordValid(true);
+
+    try {
+      const response = await axios.post('/api/auth/signup', {
+        firstName,
+        lastName,
+        username,
+        password
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      // Store token and redirect on successful signup
+      localStorage.setItem('token', response.data.token);
+      router.push('/'); // Redirect to home page or dashboard
+    } catch (error: any) {
+      setError(error.response?.data?.message || 'Something went wrong');
+    }
   };
 
   return (
@@ -49,7 +77,7 @@ const SignUpEmail: React.FC = () => {
 
       {/* Right half: Sign Up Form */}
       <div className="w-full md:w-1/2 flex items-center justify-center bg-white p-8">
-        <form className="w-full max-w-md">
+        <form className="w-full max-w-md" onSubmit={handleSubmit}>
           <h1 className="text-3xl font-bold mb-6 text-center">Sign Up</h1>
 
           {/* First Name and Last Name */}
@@ -61,6 +89,8 @@ const SignUpEmail: React.FC = () => {
               <input
                 id="firstName"
                 type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-600"
                 required
               />
@@ -72,29 +102,12 @@ const SignUpEmail: React.FC = () => {
               <input
                 id="lastName"
                 type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-600"
                 required
               />
             </div>
-          </div>
-
-          {/* Email */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1" htmlFor="email">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={handleEmailChange}
-              className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-600"
-              required
-            />
-            {/* Email validation message */}
-            {!emailValid && email && (
-              <p className="text-red-500 text-sm mt-2">Not a valid email format</p>
-            )}
           </div>
 
           {/* Username */}
@@ -105,9 +118,18 @@ const SignUpEmail: React.FC = () => {
             <input
               id="username"
               type="text"
+              value={username}
+              onChange={(e) => {
+                const newUsername = e.target.value;
+                setUsername(newUsername);
+                setUsernameValid(validateUsername(newUsername));
+              }}
               className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-600"
               required
             />
+            {!usernameValid && username && (
+              <p className="text-red-500 text-sm mt-2">Username must be 1-15 characters long and contain only letters and numbers</p>
+            )}
           </div>
 
           {/* Password */}
@@ -119,7 +141,11 @@ const SignUpEmail: React.FC = () => {
               id="password"
               type="password"
               value={password}
-              onChange={handlePasswordChange}
+              onChange={(e) => {
+                const newPassword = e.target.value;
+                setPassword(newPassword);
+                setPasswordValid(validatePassword(newPassword));
+              }}
               className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-600"
               required
             />
@@ -130,22 +156,22 @@ const SignUpEmail: React.FC = () => {
                 <li>Must include at least one symbol</li>
               </ul>
             </div>
-            {/* Password validation message */}
             {!passwordValid && password && (
               <p className="text-red-500 text-sm mt-2">Password does not meet the requirements</p>
             )}
           </div>
 
-          {/* Next Button */}
+          {/* Sign Up Button */}
           <button
             type="submit"
             className={`w-full py-2 px-4 bg-black text-white font-bold rounded-lg hover:bg-gray-900 ${
-              !passwordValid || !emailValid ? 'opacity-50 cursor-not-allowed' : ''
+              !passwordValid || !usernameValid ? 'opacity-50 cursor-not-allowed' : ''
             }`}
-            disabled={!passwordValid || !emailValid}
+            disabled={!passwordValid || !usernameValid}
           >
-            Next
+            Sign Up
           </button>
+          {error && <p className="text-red-500 text-center mt-4">{error}</p>}
         </form>
       </div>
     </div>
@@ -153,3 +179,4 @@ const SignUpEmail: React.FC = () => {
 };
 
 export default SignUpEmail;
+
