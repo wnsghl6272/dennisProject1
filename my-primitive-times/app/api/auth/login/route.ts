@@ -1,9 +1,9 @@
 // app/api/auth/login/route.ts
-import type { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import pool from '../../../lib/db';
+import { generateTokens } from '../../../lib/token'; // generateTokens 함수 가져오기
 
 dotenv.config();
 
@@ -12,8 +12,6 @@ interface User {
   username: string;
   password: string;
 }
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 
 export async function POST(req: NextRequest) {
   try {
@@ -44,12 +42,25 @@ export async function POST(req: NextRequest) {
       return new Response(JSON.stringify({ message: 'Invalid password' }), { status: 401 });
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+    // Generate tokens
+    const { accessToken, refreshToken } = generateTokens(user.uuid);
 
-    const response = new Response(JSON.stringify({ message: 'Logged in successfully' }), { status: 200 });
-    
-    // save the token in cookie
-    response.headers.set('Set-Cookie', `token=${token}; HttpOnly; Secure; Max-Age=3600; Path=/;`);
+    // Set tokens in cookies
+    const response = NextResponse.json({ message: 'Logged in successfully' });
+    response.cookies.set('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // Use Secure flag only in production
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 300, // 5 minutes
+    });
+    response.cookies.set('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // Use Secure flag only in production
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 604800, // 7 days
+    });
 
     return response;
   } catch (error) {

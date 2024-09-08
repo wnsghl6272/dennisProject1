@@ -3,10 +3,9 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation'; // Correct import for Client Components
-import Link from 'next/link';
-import axios from 'axios';
-import { useAppDispatch, useAppSelector } from '../app/store/store'; // Ensure correct path
-import { login, logout } from '../app/store/store'; // Ensure correct path
+import axios from '../app/lib/axios';
+import { useAppDispatch, useAppSelector } from '../app/store/store';
+import { login, logout } from '../app/store/store';
 
 const Navbar: React.FC = () => {
   const router = useRouter();
@@ -28,7 +27,7 @@ const Navbar: React.FC = () => {
     };
 
     checkAuthStatus();
-  }, [dispatch]);
+  }, []);
 
   const handleNavigation = (path: string) => {
     router.push(path);
@@ -36,6 +35,16 @@ const Navbar: React.FC = () => {
 
   const handleLogoClick = () => {
     router.push('/'); // Navigate to the homepage
+  };
+
+  const handleLogout = async () => {
+    try {
+      await axios.post('/api/auth/logout'); // Optionally call an API endpoint for logout if needed
+      dispatch(logout());
+      router.push('/login'); // Redirect to login page after logout
+    } catch (error) {
+      console.error('Logout failed', error);
+    }
   };
 
   return (
@@ -82,12 +91,20 @@ const Navbar: React.FC = () => {
           </button>
 
           {isLogin ? (
-            <button
-              onClick={() => handleNavigation('/logout')}
-              className="px-4 py-2 text-red-500"
-            >
-              Logout
-            </button>
+            <>
+              <button
+                onClick={() => handleNavigation('/mypage')} // Navigate to My Page
+                className="px-4 py-2 text-black"
+              >
+                My Page
+              </button>
+              <button
+                onClick={handleLogout} // Directly handle logout
+                className="px-4 py-2 text-red-500"
+              >
+                Logout
+              </button>
+            </>
           ) : (
             <>
               <button
