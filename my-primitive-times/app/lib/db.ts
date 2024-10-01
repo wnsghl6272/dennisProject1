@@ -2,11 +2,11 @@
 import { Pool } from 'pg';
 
 const pool = new Pool({
-  user: 'dennis1',
-  host: '13.53.203.150',
-  database: 'junwebserver',
-  password: 'fkdla90',
-  port: 5432, // default PostgreSQL port
+  user: process.env.POSTGRES_USER,
+  host: process.env.POSTGRES_HOST,
+  database: process.env.POSTGRES_DB,
+  password: process.env.POSTGRES_PASSWORD,
+  port: Number(process.env.POSTGRES_PORT),
 });
 
 export default pool;

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import pool from '../../../lib/db';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'ad1das23ads148344';
+const JWT_SECRET = process.env.JWT_SECRET as string;
 
 export async function GET(req: NextRequest) {
   console.log("API request received at /api/auth/user");
