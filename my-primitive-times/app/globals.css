@@ -2,4 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  main {
+    flex: 1; /* This makes the main content take up the available space */
+  }
+  
+  footer {
+    background-color: #f0f0f0; /* Adjust footer background color if needed */
+    padding: 20px; /* Adjust padding if needed */
+  }

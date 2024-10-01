@@ -1,14 +1,12 @@
-// app/api/auth/google/callback/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { OAuth2Client } from 'google-auth-library';
-import jwt from 'jsonwebtoken';
 import pool from '../../../../lib/db'; // Ensure correct path to db.ts
 import axios from 'axios'; // Use axios to make HTTP requests
+import { generateTokens } from '@/app/lib/token';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const REDIRECT_URI = 'http://localhost:3000/api/auth/google/callback';
-const JWT_SECRET = process.env.JWT_SECRET || 'ad1das23ads148344';
 
 const client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
 
@@ -41,12 +39,13 @@ export async function GET(request: NextRequest) {
     const result = await pool.query(query, values);
     const user = result.rows[0]; // The user record from the database
 
-    // Generate JWT token
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+    // Generate JWT token including google_id
+    const { accessToken, refreshToken } = generateTokens(user.google_id); // Change to user.google_id
 
     // Set the token in a cookie
     const headers = new Headers();
-    headers.append('Set-Cookie', `token=${token}; HttpOnly; Path=/; Max-Age=3600`);
+    headers.append('Set-Cookie', `accessToken=${accessToken}; HttpOnly; Path=/; Max-Age=300`); // 5 minutes
+    headers.append('Set-Cookie', `refreshToken=${refreshToken}; HttpOnly; Path=/; Max-Age=604800`); // 7 days
 
     // Redirect to the home page or another page
     return NextResponse.redirect('http://localhost:3000/', { headers });

@@ -3,7 +3,7 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation'; // Correct import for Client Components
-import axios from '../app/lib/axios';
+import apiClient from '../app/utils/apiClient';
 import { useAppDispatch, useAppSelector } from '../app/store/store';
 import { login, logout } from '../app/store/store';
 
@@ -15,7 +15,7 @@ const Navbar: React.FC = () => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const response = await axios.get('/api/auth/check');
+        const response = await apiClient.get('/api/auth/check');
         if (response.data.isLogin) {
           dispatch(login());
         } else {
@@ -39,7 +39,7 @@ const Navbar: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.post('/api/auth/logout'); // Optionally call an API endpoint for logout if needed
+      await apiClient.post('/api/auth/logout'); // Optionally call an API endpoint for logout if needed
       dispatch(logout());
       router.push('/login'); // Redirect to login page after logout
     } catch (error) {

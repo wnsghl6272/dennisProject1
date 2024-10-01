@@ -5,12 +5,13 @@ import jwt from 'jsonwebtoken';
 export async function POST(req: NextRequest) {
   // Get the refresh token from cookies
   const cookie = req.cookies.get('refreshToken');
-  
-  if (!cookie || typeof cookie !== 'string') {
+
+  if (!cookie || typeof cookie.value !== 'string') {
+    console.error('No refresh token found or invalid cookie format');
     return NextResponse.json({ message: 'No refresh token' }, { status: 401 });
   }
 
-  const refreshToken = cookie;
+  const refreshToken = cookie.value; // Access the cookie's value
 
   try {
     // Verify the refresh token
@@ -20,13 +21,32 @@ export async function POST(req: NextRequest) {
     // Generate a new access token
     const newAccessToken = jwt.sign({ id }, process.env.JWT_SECRET as string, { expiresIn: '5m' });
 
-    console.log('Refresh Token:', refreshToken);
-    console.log('Decoded Token:', decoded);
+    // Set the new access token in an HttpOnly cookie
+    const response = NextResponse.json({ message: 'New access token generated' });
 
-    return NextResponse.json({ accessToken: newAccessToken });
+    response.cookies.set('accessToken', newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // Use Secure flag only in production
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 300, // 5 minutes
+    });
 
-    
+     //to store the newly generated access token in an HttpOnly cookie. 
+    //This will ensure that when the refresh token is used to generate a new access token, it is securely sent to the client as a cookie.
+
+
+    console.log('New access token generated successfully.');
+
+    return response;
   } catch (error) {
-    return NextResponse.json({ message: 'Invalid refresh token' }, { status: 403 });
+    if (error instanceof jwt.TokenExpiredError) {
+      console.error('Refresh token expired:', error);
+      return NextResponse.json({ message: 'Refresh token expired' }, { status: 403 });
+    } else {
+      console.error('Error verifying refresh token:', error);
+      return NextResponse.json({ message: 'Invalid refresh token' }, { status: 403 });
+    }
   }
 }
+
