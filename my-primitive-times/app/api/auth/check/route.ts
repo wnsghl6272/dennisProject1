@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   const token = req.cookies.get('accessToken')?.value;
   console.log("Token from cookies:", token);
   if (!token) {
-    return NextResponse.json({ isLogin: false }, { status: 401 });
+    return NextResponse.json({ isLogin: false });
   }
 
   try {

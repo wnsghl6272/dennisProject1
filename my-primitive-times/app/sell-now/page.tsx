@@ -2,9 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import apiClient from '../utils/apiClient';
+import { useAppDispatch, useAppSelector } from '../store/store';
+import { login, logout } from '../store/store';
 
 const SellNow: React.FC = () => {
-  const [isLogin, setIsLogin] = useState(false);
+  const dispatch = useAppDispatch();
+  const isLogin = useAppSelector((state) => state.auth.isLogin);
   const [photos, setPhotos] = useState<File[]>([]);
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
@@ -20,7 +23,7 @@ const SellNow: React.FC = () => {
       try {
         const response = await apiClient.get('/api/auth/check');
         if (response.data.isLogin) {
-          setIsLogin(true);
+          dispatch(login());
         } else {
           router.push('/login'); // Redirect if not logged in
         }
