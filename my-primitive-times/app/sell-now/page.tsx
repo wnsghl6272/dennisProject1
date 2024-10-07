@@ -1,8 +1,11 @@
 // app/sell-now/page.tsx
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 const SellNow: React.FC = () => {
+  const [isLogin, setIsLogin] = useState(false);
   const [photos, setPhotos] = useState<File[]>([]);
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
@@ -11,6 +14,25 @@ const SellNow: React.FC = () => {
   const [location, setLocation] = useState('');
   const [city, setCity] = useState('');
   const [price, setPrice] = useState('');
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const response = await axios.get('/api/auth/check');
+        if (response.data.isLogin) {
+          setIsLogin(true);
+        } else {
+          router.push('/login'); // Redirect if not logged in
+        }
+      } catch (error) {
+        console.error('Error checking login status:', error);
+        router.push('/login');
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
 
   const handlePhotoUpload = (index: number) => {
     const input = document.getElementById(`photo-upload-${index}`) as HTMLInputElement;
@@ -29,6 +51,10 @@ const SellNow: React.FC = () => {
       });
     }
   };
+
+  if (!isLogin) {
+    return null; // Optionally render a loading state here
+  }
 
   return (
     <div className="container mx-auto px-6 py-12 bg-gray-50 rounded-lg shadow-lg">
@@ -53,7 +79,11 @@ const SellNow: React.FC = () => {
               onChange={handleFileChange(index)}
             />
             {photos[index] ? (
-              <img src={URL.createObjectURL(photos[index])} alt={`Uploaded ${index + 1}`} className="h-full w-full object-cover rounded-md" />
+              <img
+                src={URL.createObjectURL(photos[index])}
+                alt={`Uploaded ${index + 1}`}
+                className="h-full w-full object-cover rounded-md"
+              />
             ) : (
               <span className="text-gray-500 font-medium">Add a photo</span>
             )}
