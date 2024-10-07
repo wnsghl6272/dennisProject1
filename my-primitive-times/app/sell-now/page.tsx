@@ -1,8 +1,7 @@
-// app/sell-now/page.tsx
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 
 const SellNow: React.FC = () => {
   const [isLogin, setIsLogin] = useState(false);
@@ -19,7 +18,7 @@ const SellNow: React.FC = () => {
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        const response = await axios.get('/api/auth/check');
+        const response = await apiClient.get('/api/auth/check');
         if (response.data.isLogin) {
           setIsLogin(true);
         } else {

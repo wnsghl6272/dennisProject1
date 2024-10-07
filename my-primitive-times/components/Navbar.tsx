@@ -17,11 +17,14 @@ const Navbar: React.FC = () => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const response = await apiClient.get('/api/auth/check');
-        if (response.data.isLogin) {
-          dispatch(login());
-        } else {
-          dispatch(logout());
+        // 이미 로그인 상태일 경우 API 호출 생략
+        if (!isLogin) {
+          const response = await apiClient.get('/api/auth/check');
+          if (response.data.isLogin) {
+            dispatch(login());
+          } else {
+            dispatch(logout());
+          }
         }
       } catch (error) {
         dispatch(logout());

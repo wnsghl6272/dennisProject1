@@ -6,6 +6,7 @@ export async function POST(req: NextRequest) {
   // Get the refresh token from cookies
   const cookie = req.cookies.get('refreshToken');
 
+  // 그냥 mypage로 접근하면 무한으로 api가 호출된다 이부분 수정
   if (!cookie || typeof cookie.value !== 'string') {
     console.error('No refresh token found or invalid cookie format');
     return NextResponse.json({ message: 'No refresh token' }, { status: 401 });
