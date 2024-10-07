@@ -6,11 +6,13 @@ import { useRouter } from 'next/navigation'; // Correct import for Client Compon
 import apiClient from '../app/utils/apiClient';
 import { useAppDispatch, useAppSelector } from '../app/store/store';
 import { login, logout } from '../app/store/store';
+import { useTranslation } from 'react-i18next';
 
 const Navbar: React.FC = () => {
   const router = useRouter();
   const isLogin = useAppSelector((state) => state.auth.isLogin);
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -59,7 +61,7 @@ const Navbar: React.FC = () => {
         <div className="flex-1 flex justify-center">
           <input
             type="text"
-            placeholder="Search"
+            placeholder={t('search')}
             className="w-full max-w-md px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
           />
         </div>
@@ -87,7 +89,7 @@ const Navbar: React.FC = () => {
             onClick={() => handleNavigation('/sell-now')}
             className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800"
           >
-            Sell Now
+            {t('sell_now')}
           </button>
 
           {isLogin ? (
@@ -96,13 +98,13 @@ const Navbar: React.FC = () => {
                 onClick={() => handleNavigation('/mypage')} // Navigate to My Page
                 className="px-4 py-2 text-black"
               >
-                My Page
+                {t('mypage')}
               </button>
               <button
                 onClick={handleLogout} // Directly handle logout
                 className="px-4 py-2 text-red-500"
               >
-                Logout
+                {t('logout')}
               </button>
             </>
           ) : (
@@ -111,13 +113,13 @@ const Navbar: React.FC = () => {
                 onClick={() => handleNavigation('/signup')}
                 className="px-4 py-2 border border-black text-black rounded-lg hover:bg-gray-100"
               >
-                Sign Up
+                {t('signup')}
               </button>
               <button
                 onClick={() => handleNavigation('/login')}
                 className="px-4 py-2 text-black"
               >
-                Log In
+                {t('login')}
               </button>
             </>
           )}

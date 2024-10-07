@@ -1,0 +1,21 @@
+{
+    "buy_sell_circular": "购买。出售。让时尚循环。",
+    "sell_now": "立即出售",
+    "menwear": "男装",
+    "womenwear": "女装",
+    "brands": "品牌",
+    "sale": "促销",
+    "search": "搜索",
+    "favorite": "收藏夹",
+    "cart": "购物车",
+    "login": "登录",
+    "signup": "注册",
+    "mypage": "我的页面",
+    "logout": "登出",
+    "popular_this_week": "本周热门",
+    "item_searches": "上周搜索了 {{count}} 次",
+    "language_english": "英语",
+    "language_korean": "韩语",
+    "language_chinese": "中文",
+    "shop_now": "购物"
+  }

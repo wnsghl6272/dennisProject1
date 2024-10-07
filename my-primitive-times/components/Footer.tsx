@@ -1,11 +1,14 @@
-// components/Footer.tsx
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useRouter } from 'next/navigation'; // Import useRouter
 
 const Footer: React.FC = () => {
+  const { i18n } = useTranslation();
+  const router = useRouter(); // Initialize useRouter
   const [locationDropdown, setLocationDropdown] = useState(false);
   const [languageDropdown, setLanguageDropdown] = useState(false);
-
+  const [isMounted, setIsMounted] = useState(false);
   const locationRef = useRef<HTMLDivElement>(null);
   const languageRef = useRef<HTMLDivElement>(null);
 
@@ -22,11 +25,23 @@ const Footer: React.FC = () => {
   };
 
   useEffect(() => {
+    setIsMounted(true);
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // Handle language change
+  const handleLanguageChange = (lang: string) => {
+    i18n.changeLanguage(lang);
+    setLanguageDropdown(false);
+    router.push('/'); // Redirect to home page
+  };
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <footer className="bg-gray-200 py-8 px-4">
@@ -59,16 +74,28 @@ const Footer: React.FC = () => {
               onClick={toggleLanguageDropdown}
               className="px-4 py-2 bg-gray-300 text-black rounded flex items-center focus:outline-none"
             >
-              English
+              {i18n.language === 'en' ? 'English' : i18n.language === 'ko' ? '한국어' : '中文'}
               <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
               </svg>
             </button>
             {languageDropdown && (
               <ul className="absolute bottom-full left-0 mb-2 w-40 bg-white border border-gray-300 rounded shadow-lg">
-                <li><a href="#english" className="block px-4 py-2 hover:bg-gray-100">English</a></li>
-                <li><a href="#chinese" className="block px-4 py-2 hover:bg-gray-100">Chinese</a></li>
-                <li><a href="#korean" className="block px-4 py-2 hover:bg-gray-100">Korean</a></li>
+                <li>
+                  <button onClick={() => handleLanguageChange('en')} className="block w-full text-left px-4 py-2 hover:bg-gray-100">
+                    English
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => handleLanguageChange('cn')} className="block w-full text-left px-4 py-2 hover:bg-gray-100">
+                    Chinese
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => handleLanguageChange('ko')} className="block w-full text-left px-4 py-2 hover:bg-gray-100">
+                    한국어
+                  </button>
+                </li>
               </ul>
             )}
           </div>

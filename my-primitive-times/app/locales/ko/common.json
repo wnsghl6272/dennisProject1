@@ -1,0 +1,22 @@
+{
+    "buy_sell_circular": "사고. 팔고. 패션을 찾아보세요.",
+    "sell_now": "판매하기",
+    "menwear": "남성복",
+    "womenwear": "여성복",
+    "brands": "브랜드",
+    "sale": "세일",
+    "search": "검색",
+    "favorite": "즐겨찾기",
+    "cart": "장바구니",
+    "login": "로그인",
+    "signup": "회원가입",
+    "mypage": "마이페이지",
+    "logout": "로그아웃",
+    "popular_this_week": "이번 주 인기 상품",
+    "item_searches": "지난 주에 {{count}}번 검색됨",
+    "language_english": "영어",
+    "language_korean": "한국어",
+    "language_chinese": "중국어",
+    "shop_now": "쇼핑하기"
+  }
+  
