@@ -22,14 +22,17 @@ const SellNow: React.FC = () => {
     const checkLoginStatus = async () => {
       try {
         const response = await apiClient.get('/api/auth/check');
-        if (response.data.isLogin) {
+        if (response.status === 200 && response.data.isLogin) {
           dispatch(login());
         } else {
           router.push('/login'); // Redirect if not logged in
         }
-      } catch (error) {
-        console.error('Error checking login status:', error);
-        router.push('/login');
+      } catch (error: any) {
+        if (error.response && error.response.status === 401) {
+          router.push('/login'); // Redirect if not logged in and handle 401
+        } else {
+          console.error('Failed to check login status:', error);
+        }
       }
     };
 
