@@ -2,11 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import apiClient from '../utils/apiClient';
-import { useAppDispatch, useAppSelector } from '../store/store';
-import { login, logout } from '../store/store';
+import { useAppSelector } from '../store/store';
+import s3 from '../lib/s3Client';
+import { v4 as uuidv4 } from 'uuid';
+
 
 const SellNow: React.FC = () => {
-  const dispatch = useAppDispatch();
   const isLogin = useAppSelector((state) => state.auth.isLogin);
   const [photos, setPhotos] = useState<File[]>([]);
   const [description, setDescription] = useState('');
@@ -16,44 +17,90 @@ const SellNow: React.FC = () => {
   const [location, setLocation] = useState('');
   const [city, setCity] = useState('');
   const [price, setPrice] = useState('');
+  const [user_id, setUserId] = useState<string | null>(null);
+  const [uploadMessage, setUploadMessage] = useState('');
   const router = useRouter();
 
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        const response = await apiClient.get('/api/auth/check');
-        if (response.status === 200 && response.data.isLogin) {
-          dispatch(login());
+        // Check if the user is logged in
+        const checkResponse = await apiClient.get('/api/auth/check');
+        
+        if (checkResponse.status === 200 && checkResponse.data.isLogin) {
+          // If logged in, fetch user details
+          const userResponse = await apiClient.get('/api/auth/user');
+          if (userResponse.status === 200 && userResponse.data.user) {
+            const { google_id, uuid } = userResponse.data.user;
+            setUserId(google_id || uuid);
+          } else {
+            router.push('/login'); // If user data is not found, redirect to login
+          }
         } else {
-          router.push('/login'); // Redirect if not logged in
+          router.push('/login'); // If not logged in, redirect to login
         }
       } catch (error: any) {
-        if (error.response && error.response.status === 401) {
-          router.push('/login'); // Redirect if not logged in and handle 401
-        } else {
-          console.error('Failed to check login status:', error);
-        }
+        console.error('Error during login status check or fetching user data:', error);
+        router.push('/login'); // Redirect to login on any error
       }
     };
 
     checkLoginStatus();
   }, []);
 
+  // Handle image upload on S3
+  const handleFileChange = (index: number) => async (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(`File change event for index ${index}`, event.target.files);
+    const file = event.target.files?.[0];
+    if (file) {
+      console.log(`File selected for upload at index ${index}:`, file);
+      const fileName = `${uuidv4()}_${file.name}`;
+      const bucketName = process.env.AWS_BUCKET_NAME as string;
+      const params = {
+        Bucket:bucketName,
+        Key: fileName,
+        Body: file,
+        ContentType: file.type,
+      };
+
+      console.log(params);
+
+      try {
+        const data = await s3.upload(params).promise();
+        console.log('S3 upload response:', data);
+  
+        // Save the upload record to the database
+        const uploadResponse = await apiClient.post('/api/auth/uploads', {
+          user_id,
+          photo_url: data.Location,
+          description,
+          category,
+          brand,
+          condition,
+          location,
+          city,
+          price: price ? parseFloat(price) : 0,
+        });
+  
+          console.log('Upload record saved:', uploadResponse.data);
+  
+          // Update the photos array
+          setPhotos((prevPhotos) => {
+            const updatedPhotos = [...prevPhotos];
+            updatedPhotos[index] = file;
+            return updatedPhotos;
+          });
+      } catch (error) {
+        console.error('Error uploading file to S3:', error);
+      }
+    }
+  };
+      
+
   const handlePhotoUpload = (index: number) => {
     const input = document.getElementById(`photo-upload-${index}`) as HTMLInputElement;
     if (input) {
       input.click();
-    }
-  };
-
-  const handleFileChange = (index: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setPhotos((prevPhotos) => {
-        const updatedPhotos = [...prevPhotos];
-        updatedPhotos[index] = file;
-        return updatedPhotos;
-      });
     }
   };
 
