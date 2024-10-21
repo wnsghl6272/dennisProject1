@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 const SellNow: React.FC = () => {
   const isLogin = useAppSelector((state) => state.auth.isLogin);
   const [photos, setPhotos] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [brand, setBrand] = useState('');
@@ -53,24 +54,62 @@ const SellNow: React.FC = () => {
     console.log(`File change event for index ${index}`, event.target.files);
     const file = event.target.files?.[0];
     if (file) {
-      console.log(`File selected for upload at index ${index}:`, file);
-      const fileName = `${uuidv4()}_${file.name}`;
-      const bucketName = process.env.AWS_BUCKET_NAME as string;
-      const params = {
-        Bucket:bucketName,
-        Key: fileName,
-        Body: file,
-        ContentType: file.type,
-      };
+      const updatedPhotos = [...photos];
+      const updatedPreviewUrls = [...previewUrls];
 
-      console.log(params);
+      updatedPhotos[index] = file; // 선택한 파일을 해당 인덱스에 저장
+      updatedPreviewUrls[index] = URL.createObjectURL(file); // 미리보기 URL 생성
 
-      try {
-        const data = await s3.upload(params).promise();
-        console.log('S3 upload response:', data);
+      setPhotos(updatedPhotos);
+      setPreviewUrls(updatedPreviewUrls);
+        }
+    };
+
+      // 사진 업로드 클릭 핸들러
+  const handlePhotoUpload = (index: number) => {
+    const input = document.getElementById(`photo-upload-${index}`) as HTMLInputElement; // 해당 인덱스의 input 요소 가져오기
+    if (input) {
+      input.click(); // 클릭하여 파일 선택 다이얼로그 열기
+    }
+  };
+
+    // 사진 삭제 핸들러
+    const removePhoto = (index: number) => {
+      const updatedPhotos = [...photos];
+      const updatedPreviewUrls = [...previewUrls];
   
-        // Save the upload record to the database
-        const uploadResponse = await apiClient.post('/api/auth/uploads', {
+      updatedPhotos.splice(index, 1); // 해당 인덱스의 사진 삭제
+      updatedPreviewUrls.splice(index, 1); // 해당 인덱스의 미리보기 URL 삭제
+  
+      setPhotos(updatedPhotos);
+      setPreviewUrls(updatedPreviewUrls);
+    };
+
+      // 업로드 핸들러
+  const handleContinue = async () => {
+    if (photos.length === 0) {
+      setUploadMessage('Please upload at least one photo.'); // 사진이 없을 경우 경고 메시지 표시
+      return;
+    }
+
+    try {
+      const bucketName = process.env.AWS_BUCKET_NAME as string;
+
+      // 각 사진을 반복하면서 업로드 진행
+      for (let i = 0; i < photos.length; i++) {
+        const file = photos[i];
+        const fileName = `${uuidv4()}_${file.name}`; // 파일 이름에 UUID 추가
+        const params = {
+          Bucket: bucketName,
+          Key: fileName,
+          Body: file,
+          ContentType: file.type,
+        };
+
+        const data = await s3.upload(params).promise(); // S3에 파일 업로드
+
+        // 데이터베이스에 업로드 기록 저장
+        await apiClient.post('/api/auth/uploads', {
           user_id,
           photo_url: data.Location,
           description,
@@ -81,63 +120,57 @@ const SellNow: React.FC = () => {
           city,
           price: price ? parseFloat(price) : 0,
         });
-  
-          console.log('Upload record saved:', uploadResponse.data);
-  
-          // Update the photos array
-          setPhotos((prevPhotos) => {
-            const updatedPhotos = [...prevPhotos];
-            updatedPhotos[index] = file;
-            return updatedPhotos;
-          });
-      } catch (error) {
-        console.error('Error uploading file to S3:', error);
       }
-    }
-  };
-      
 
-  const handlePhotoUpload = (index: number) => {
-    const input = document.getElementById(`photo-upload-${index}`) as HTMLInputElement;
-    if (input) {
-      input.click();
+      setUploadMessage('Upload successful!');
+    } catch (error) {
+      console.error('Error uploading files:', error);
+      setUploadMessage('Error during upload. Please try again.');
     }
   };
 
   if (!isLogin) {
-    return null; // Optionally render a loading state here
+    return null; 
   }
 
   return (
     <div className="container mx-auto px-6 py-12 bg-gray-50 rounded-lg shadow-lg">
       <h1 className="text-4xl font-bold text-center text-gray-800 mb-8">Sell Now</h1>
 
-      {/* Photos Section */}
       <h2 className="text-2xl font-semibold mb-4 text-gray-700">Photos</h2>
       <p className="mb-4 text-gray-600">Add up to 8 photos in JPEG or PNG format.</p>
 
       <div className="grid grid-cols-4 gap-4 mb-6">
         {[...Array(8)].map((_, index) => (
-          <div
-            key={index}
-            className="border-2 border-dashed border-gray-400 h-32 flex items-center justify-center cursor-pointer relative hover:bg-gray-100 transition duration-200"
-            onClick={() => handlePhotoUpload(index)}
-          >
-            <input
-              type="file"
-              id={`photo-upload-${index}`}
-              accept="image/jpeg,image/png"
-              className="hidden"
-              onChange={handleFileChange(index)}
-            />
-            {photos[index] ? (
-              <img
-                src={URL.createObjectURL(photos[index])}
-                alt={`Uploaded ${index + 1}`}
-                className="h-full w-full object-cover rounded-md"
+          <div key={index} className="relative">
+            <div
+              className="border-2 border-dashed border-gray-400 h-32 flex items-center justify-center cursor-pointer relative hover:bg-gray-100 transition duration-200"
+              onClick={() => handlePhotoUpload(index)}
+            >
+              <input
+                type="file"
+                id={`photo-upload-${index}`}
+                accept="image/jpeg,image/png"
+                className="hidden"
+                onChange={handleFileChange(index)}
               />
-            ) : (
-              <span className="text-gray-500 font-medium">Add a photo</span>
+              {previewUrls[index] ? (
+                <img
+                  src={previewUrls[index]}
+                  alt={`Uploaded ${index + 1}`}
+                  className="h-full w-full object-cover rounded-md"
+                />
+              ) : (
+                <span className="text-gray-500 font-medium">Add a photo</span>
+              )}
+            </div>
+            {previewUrls[index] && (
+              <button
+                className="absolute top-0 right-0 bg-red-300 text-white p-1 rounded-full"
+                onClick={() => removePhoto(index)}
+              >
+                X
+              </button>
             )}
           </div>
         ))}
@@ -252,9 +285,14 @@ const SellNow: React.FC = () => {
         />
       </div>
 
-      <button className="bg-black text-white py-3 px-6 rounded-lg hover:bg-gray-800 transition duration-200 ease-in-out">
+      <button
+        className="bg-black text-white py-3 px-6 rounded-lg hover:bg-gray-800 transition duration-200 ease-in-out"
+        onClick={handleContinue}
+      >
         Continue
       </button>
+
+      {uploadMessage && <p className="mt-4 text-red-500">{uploadMessage}</p>}
     </div>
   );
 };
