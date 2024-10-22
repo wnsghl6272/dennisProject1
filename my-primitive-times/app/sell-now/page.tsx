@@ -22,6 +22,9 @@ const SellNow: React.FC = () => {
   const [uploadMessage, setUploadMessage] = useState('');
   const router = useRouter();
 
+  // Timeout ID for user inactivity
+  const [inactivityTimeoutId, setInactivityTimeoutId] = useState<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
@@ -48,6 +51,69 @@ const SellNow: React.FC = () => {
 
     checkLoginStatus();
   }, []);
+
+    // Save draft to localStorage
+    const saveDraft = () => {
+      const draft = {
+        description,
+        category,
+        brand,
+        condition,
+        location,
+        city,
+        price: price ? parseFloat(price) : 0,
+      };
+      localStorage.setItem('draft', JSON.stringify(draft));
+      setUploadMessage('Draft saved successfully!');
+    };
+  
+    // Load draft from localStorage
+    const loadDraft = () => {
+      const draft = localStorage.getItem('draft');
+      if (draft) {
+        const parsedDraft = JSON.parse(draft);
+        setDescription(parsedDraft.description);
+        setCategory(parsedDraft.category);
+        setBrand(parsedDraft.brand);
+        setCondition(parsedDraft.condition);
+        setLocation(parsedDraft.location);
+        setCity(parsedDraft.city);
+        setPrice(parsedDraft.price.toString());
+      }
+    };
+  
+    useEffect(() => {
+      loadDraft();
+    }, []);
+
+      // Function to handle user activity
+  const handleUserActivity = () => {
+    if (inactivityTimeoutId) {
+      clearTimeout(inactivityTimeoutId); // Clear the existing timeout
+    }
+
+    // Set a new timeout for 4 minutes
+    const timeoutId = setTimeout(() => {
+      saveDraft(); // Save draft after 3 minutes of inactivity
+      console.log('Draft saved');
+    }, 180000); // 3 minutes
+
+    setInactivityTimeoutId(timeoutId); // Store the timeout ID
+  };
+
+  // Set up event listeners for user activity
+  useEffect(() => {
+    window.addEventListener('mousemove', handleUserActivity);
+    window.addEventListener('keypress', handleUserActivity);
+    // Clean up event listeners on component unmount
+    return () => {
+      window.removeEventListener('mousemove', handleUserActivity);
+      window.removeEventListener('keypress', handleUserActivity);
+      if (inactivityTimeoutId) {
+        clearTimeout(inactivityTimeoutId); // Clear timeout on unmount
+      }
+    };
+  }, [inactivityTimeoutId]);
 
   // Handle image upload on S3
   const handleFileChange = (index: number) => async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,6 +159,7 @@ const SellNow: React.FC = () => {
     }
 
     try {
+      await apiClient.post('/api/auth/refresh');
       const bucketName = process.env.AWS_BUCKET_NAME as string;
 
       // 각 사진을 반복하면서 업로드 진행
@@ -123,9 +190,27 @@ const SellNow: React.FC = () => {
       }
 
       setUploadMessage('Upload successful!');
+
+            // Reset fields
+            setPhotos(Array(8).fill(null));
+            setPreviewUrls(Array(8).fill(''));
+            setDescription('');
+            setCategory('');
+            setBrand('');
+            setCondition('');
+            setLocation('');
+            setCity('');
+            setPrice('');
+
+            // Clear the draft from localStorage
+            localStorage.removeItem('draft');
+      
+            // Redirect to SellNow page
+            router.push('/sell-now'); // Replace with the correct route if different
+
     } catch (error) {
       console.error('Error uploading files:', error);
-      setUploadMessage('Error during upload. Please try again.');
+      setUploadMessage('Error during upload. Please try again.'); 
     }
   };
 
@@ -291,6 +376,12 @@ const SellNow: React.FC = () => {
       >
         Continue
       </button>
+      <button
+          className="bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition duration-200"
+          onClick={saveDraft}
+        >
+          Save Draft
+        </button>
 
       {uploadMessage && <p className="mt-4 text-red-500">{uploadMessage}</p>}
     </div>
