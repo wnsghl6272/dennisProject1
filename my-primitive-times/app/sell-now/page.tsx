@@ -18,7 +18,8 @@ const SellNow: React.FC = () => {
   const [location, setLocation] = useState('');
   const [city, setCity] = useState('');
   const [price, setPrice] = useState('');
-  const [user_id, setUserId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isGoogleUser, setIsGoogleUser] = useState<boolean>(false);
   const [uploadMessage, setUploadMessage] = useState('');
   const router = useRouter();
 
@@ -28,7 +29,6 @@ const SellNow: React.FC = () => {
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        // Check if the user is logged in
         const checkResponse = await apiClient.get('/api/auth/check');
         
         if (checkResponse.status === 200 && checkResponse.data.isLogin) {
@@ -36,7 +36,13 @@ const SellNow: React.FC = () => {
           const userResponse = await apiClient.get('/api/auth/user');
           if (userResponse.status === 200 && userResponse.data.user) {
             const { google_id, uuid } = userResponse.data.user;
-            setUserId(google_id || uuid);
+            if (google_id) {
+              setUserId(google_id);
+              setIsGoogleUser(true);
+            } else {
+              setUserId(uuid);
+              setIsGoogleUser(false);
+            }
           } else {
             router.push('/login'); // If user data is not found, redirect to login
           }
@@ -177,7 +183,8 @@ const SellNow: React.FC = () => {
 
         // 데이터베이스에 업로드 기록 저장
         await apiClient.post('/api/auth/uploads', {
-          user_id,
+          user_id: userId,
+          is_google_user: isGoogleUser,
           photo_url: data.Location,
           description,
           category,
