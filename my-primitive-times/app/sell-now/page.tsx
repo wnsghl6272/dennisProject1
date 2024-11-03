@@ -87,6 +87,16 @@ const SellNow: React.FC = () => {
         setPrice(parsedDraft.price.toString());
       }
     };
+
+    // Error conditon
+    const [errors, setErrors] = useState({
+      photos: '',
+      description: '',
+      category: '',
+      brand: '',
+      condition: '',
+      price: ''
+    });
   
     useEffect(() => {
       loadDraft();
@@ -158,9 +168,62 @@ const SellNow: React.FC = () => {
     };
 
       // 업로드 핸들러
-  const handleContinue = async () => {
+    const handleContinue = async () => {
+    // Reset all errors first
+    setErrors({
+      photos: '',
+      description: '',
+      category: '',
+      brand: '',
+      condition: '',
+      price: ''
+    });
+
+    let hasErrors = false;
+    const newErrors = {
+      photos: '',
+      description: '',
+      category: '',
+      brand: '',
+      condition: '',
+      price: ''
+    };
+
+    // Validate photos
     if (photos.length === 0) {
-      setUploadMessage('Please upload at least one photo.'); // 사진이 없을 경우 경고 메시지 표시
+      newErrors.photos = 'Please insert at least one image';
+      hasErrors = true;
+    }
+
+    // Validate required fields
+    if (!description.trim()) {
+      newErrors.description = 'This field is required';
+      hasErrors = true;
+    }
+
+    if (!category.trim()) {
+      newErrors.category = 'This field is required';
+      hasErrors = true;
+    }
+
+    if (!brand.trim()) {
+      newErrors.brand = 'This field is required';
+      hasErrors = true;
+    }
+
+    if (!condition.trim()) {
+      newErrors.condition = 'This field is required';
+      hasErrors = true;
+    }
+
+      // Price validation - check if price is empty, 0, or negative
+    if (!price || parseFloat(price) <= 0) {
+      newErrors.price = 'Please enter a valid price greater than 0';
+      hasErrors = true;
+    }
+    setErrors(newErrors);
+
+    if (hasErrors) {
       return;
     }
 
@@ -267,6 +330,7 @@ const SellNow: React.FC = () => {
           </div>
         ))}
       </div>
+      {errors.photos && <p className="text-red-500 mb-6">{errors.photos}</p>}
 
       {/* Description Section */}
       <h2 className="text-2xl font-semibold mb-4 text-gray-700">Description</h2>
@@ -277,6 +341,7 @@ const SellNow: React.FC = () => {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
+      {errors.description && <p className="text-red-500 mb-6">{errors.description}</p>}
 
       {/* Info Section */}
       <h2 className="text-2xl font-semibold mb-4 text-gray-700">Info</h2>
@@ -289,6 +354,7 @@ const SellNow: React.FC = () => {
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         />
+        {errors.category && <p className="text-red-500 mb-2">{errors.category}</p>}
       </div>
 
       <div className="mb-6">
@@ -300,6 +366,7 @@ const SellNow: React.FC = () => {
           value={brand}
           onChange={(e) => setBrand(e.target.value)}
         />
+        {errors.brand && <p className="text-red-500 mb-2">{errors.brand}</p>}
       </div>
 
       <div className="mb-6">
@@ -311,6 +378,7 @@ const SellNow: React.FC = () => {
           value={condition}
           onChange={(e) => setCondition(e.target.value)}
         />
+        {errors.condition && <p className="text-red-500 mb-2">{errors.condition}</p>}
       </div>
 
       {/* Location Section */}
@@ -376,6 +444,8 @@ const SellNow: React.FC = () => {
           onChange={(e) => setPrice(e.target.value)}
         />
       </div>
+      {errors.price && <p className="text-red-500 mb-6">{errors.price}</p>}
+      
 
       <button
         className="bg-black text-white py-3 px-6 rounded-lg hover:bg-gray-800 transition duration-200 ease-in-out"
