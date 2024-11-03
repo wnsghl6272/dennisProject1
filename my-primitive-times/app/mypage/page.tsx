@@ -2,6 +2,7 @@
 'use client'
 import { useEffect, useState } from 'react';
 import apiClient from '../utils/apiClient';
+import { useRouter } from 'next/navigation';
 
 interface User {
   first_name: string;
@@ -28,6 +29,7 @@ const MyPage = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -55,6 +57,10 @@ const MyPage = () => {
     setLoading(false);
   }, []);
 
+  const handleProductClick = (id: string) => {
+    router.push(`/products/${id}`);
+  };
+
   if (error) return <p>{error}</p>;
 
   return (
@@ -78,10 +84,6 @@ const MyPage = () => {
             <div className="h-12 bg-gray-300 rounded"></div>
             <div className="h-12 bg-gray-300 rounded"></div>
             <div className="h-12 bg-gray-300 rounded"></div>
-          </div>
-          <div className="mt-10 border border-gray-300 p-6 text-center w-full">
-            <p className="text-gray-400">Start selling today and turn your clothes into cash</p>
-            <div className="mt-4 w-full h-12 bg-gray-300 rounded"></div>
           </div>
         </div>
       ) : user ? (
@@ -112,14 +114,23 @@ const MyPage = () => {
             <div className="p-2 border border-gray-300 text-center">Likes</div>
             <div className="p-2 border border-gray-300 text-center">Saved</div>
           </div>
+
           {/* User's Listed Items */}
           <div className="mt-10 border border-gray-300 p-6 text-center w-full">
             <p className="mb-4">Start selling today and turn your clothes into cash</p>
             {items.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {items.map((item) => (
-                  <div key={item.id} className="border rounded-lg p-4 bg-white shadow-sm">
-                    <img src={item.photo_url} alt={item.description} className="w-full h-48 object-cover rounded-md mb-2" />
+                  <div 
+                    key={item.id} 
+                    className="border rounded-lg p-4 bg-white shadow-sm cursor-pointer hover:shadow-md transition-shadow duration-200"
+                    onClick={() => handleProductClick(item.id)}
+                  >
+                    <img 
+                      src={item.photo_url} 
+                      alt={item.description} 
+                      className="w-full h-48 object-cover rounded-md mb-2" 
+                    />
                     <h2 className="font-semibold text-lg">{item.description}</h2>
                     <p className="text-gray-600">{item.brand}</p>
                     <p className="text-gray-500">Category: {item.category}</p>
@@ -132,7 +143,12 @@ const MyPage = () => {
             ) : (
               <p className="text-gray-400">You have no items listed. List your first item!</p>
             )}
-            <button className="mt-4 px-6 py-3 bg-black text-white rounded-lg">List an item</button>
+            <button 
+              className="mt-4 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200"
+              onClick={() => router.push('/sell-now')}
+            >
+              List an item
+            </button>
           </div>
         </div>
       ) : (

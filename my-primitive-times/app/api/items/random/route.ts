@@ -3,9 +3,19 @@ import db from '../../../lib/db';
 
 export async function GET() {
   try {
+    // 모든 제품을 가져오는 쿼리
     const query = `
-      SELECT id, photo_url, description, brand, condition, price
-      FROM uploads
+      SELECT 
+        id, 
+        photo_url, 
+        description, 
+        brand, 
+        condition, 
+        price
+      FROM (
+        SELECT DISTINCT *
+        FROM uploads
+      ) AS unique_items
       ORDER BY RANDOM()
       LIMIT 7
     `;
@@ -19,11 +29,15 @@ export async function GET() {
       });
     }
 
-    return NextResponse.json({ items: result.rows });
+    return NextResponse.json({ 
+      items: result.rows,
+      count: result.rows.length 
+    });
+
   } catch (error) {
-    console.error('Error fetching random items:', error);
+    console.error('Error fetching items:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch random items' }, 
+      { error: 'Failed to fetch items' }, 
       { status: 500 }
     );
   }
