@@ -1,16 +1,38 @@
-import React from 'react';
+'use client';
+import React, { useEffect, useState } from 'react';
+import apiClient from '@/app/utils/apiClient';
 
-const images = [
-  { src: '/images/item1.jpg', alt: 'Item 1' },
-  { src: '/images/item2.jpg', alt: 'Item 2' },
-  { src: '/images/item3.jpg', alt: 'Item 3' },
-  { src: '/images/item4.jpg', alt: 'Item 4' },
-  { src: '/images/item5.jpg', alt: 'Item 5' },
-  { src: '/images/item6.jpg', alt: 'Item 6' },
-  { src: '/images/large-item.jpg', alt: 'Large Item' } // Large image
-];
+interface Item {
+  id: string;
+  photo_url: string;
+  description: string;
+  brand: string;
+  condition: string;
+  price: number;
+}
 
 const TheDepopEdit: React.FC = () => {
+  const [items, setItems] = useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRandomItems = async () => {
+      try {
+        const response = await apiClient.get('/api/items/random');
+        setItems(response.data.items);
+      } catch (error) {
+        console.error('Error fetching random items:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRandomItems();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
   return (
     <section className="w-full mt-16">
       <div className="max-w-7xl mx-auto px-4">
@@ -28,65 +50,74 @@ const TheDepopEdit: React.FC = () => {
           </a>
         </div>
 
-        {/* Image Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Mobile: Large Image */}
-          <div className="md:hidden col-span-1 relative h-[200px]">
-            <img
-              src={images[6].src} // Large image
-              alt={images[6].alt}
-              className="w-full h-full object-cover"
-            />
-            {/* Hover Overlay */}
-            <div className="absolute inset-0 bg-gray-800 bg-opacity-40 opacity-0 hover:opacity-100 transition-opacity"></div>
-          </div>
+          {items[0] && (
+            <div className="md:hidden col-span-1 relative overflow-hidden group">
+              <img
+                src={items[0].photo_url}
+                alt={items[0].description}
+                className="w-full h-[200px] object-cover transition-transform duration-300 group-hover:scale-110"
+              />
+              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <p className="text-sm font-bold">${items[0].price}</p>
+                <p className="text-xs">{items[0].brand}</p>
+                <p className="text-xs">{items[0].condition}</p>
+              </div>
+            </div>
+          )}
 
           {/* Mobile: 2x3 Image Grid */}
           <div className="md:hidden grid grid-cols-2 gap-4 col-span-1">
-            {images.slice(0, 6).map((image, index) => (
-              <div
-                key={index}
-                className="relative h-[200px]" // Adjust height as needed
-              >
+            {items.slice(1, 7).map((item) => (
+              <div key={item.id} className="relative overflow-hidden group">
                 <img
-                  src={image.src}
-                  alt={image.alt}
-                  className="w-full h-full object-cover"
+                  src={item.photo_url}
+                  alt={item.description}
+                  className="w-full h-[200px] object-cover transition-transform duration-300 group-hover:scale-110"
                 />
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-gray-800 bg-opacity-40 opacity-0 hover:opacity-100 transition-opacity"></div>
+                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <p className="text-sm font-bold">${item.price}</p>
+                  <p className="text-xs">{item.brand}</p>
+                  <p className="text-xs">{item.condition}</p>
+                </div>
               </div>
             ))}
           </div>
 
           {/* Desktop: Left Side: 2x3 Images */}
           <div className="hidden md:grid md:col-span-2 grid-cols-3 gap-4">
-            {images.slice(0, 6).map((image, index) => (
-              <div
-                key={index}
-                className="relative h-[200px]" // Adjust height as needed
-              >
+            {items.slice(0, 6).map((item) => (
+              <div key={item.id} className="relative overflow-hidden group">
                 <img
-                  src={image.src}
-                  alt={image.alt}
-                  className="w-full h-full object-cover"
+                  src={item.photo_url}
+                  alt={item.description}
+                  className="w-full h-[200px] object-cover transition-transform duration-300 group-hover:scale-110"
                 />
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-gray-800 bg-opacity-40 opacity-0 hover:opacity-100 transition-opacity"></div>
+                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <p className="text-sm font-bold">${item.price}</p>
+                  <p className="text-xs">{item.brand}</p>
+                  <p className="text-xs">{item.condition}</p>
+                </div>
               </div>
             ))}
           </div>
 
           {/* Desktop: Right Side: Large Image */}
-          <div className="hidden md:block md:col-span-1 relative">
-            <img
-              src={images[6].src} // Large image
-              alt={images[6].alt}
-              className="w-full h-full object-cover"
-            />
-            {/* Hover Overlay */}
-            <div className="absolute inset-0 bg-gray-800 bg-opacity-40 opacity-0 hover:opacity-100 transition-opacity"></div>
-          </div>
+          {items[6] && (
+            <div className="hidden md:block md:col-span-1 relative overflow-hidden group">
+              <img
+                src={items[6].photo_url}
+                alt={items[6].description}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+              />
+              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <p className="text-sm font-bold">${items[6].price}</p>
+                <p className="text-xs">{items[6].brand}</p>
+                <p className="text-xs">{items[6].condition}</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>
