@@ -18,14 +18,17 @@ const SellNow: React.FC = () => {
   const [location, setLocation] = useState('');
   const [city, setCity] = useState('');
   const [price, setPrice] = useState('');
-  const [user_id, setUserId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isGoogleUser, setIsGoogleUser] = useState<boolean>(false);
   const [uploadMessage, setUploadMessage] = useState('');
   const router = useRouter();
+
+  // Timeout ID for user inactivity
+  const [inactivityTimeoutId, setInactivityTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        // Check if the user is logged in
         const checkResponse = await apiClient.get('/api/auth/check');
         
         if (checkResponse.status === 200 && checkResponse.data.isLogin) {
@@ -33,7 +36,13 @@ const SellNow: React.FC = () => {
           const userResponse = await apiClient.get('/api/auth/user');
           if (userResponse.status === 200 && userResponse.data.user) {
             const { google_id, uuid } = userResponse.data.user;
-            setUserId(google_id || uuid);
+            if (google_id) {
+              setUserId(google_id);
+              setIsGoogleUser(true);
+            } else {
+              setUserId(uuid);
+              setIsGoogleUser(false);
+            }
           } else {
             router.push('/login'); // If user data is not found, redirect to login
           }
@@ -48,6 +57,79 @@ const SellNow: React.FC = () => {
 
     checkLoginStatus();
   }, []);
+
+    // Save draft to localStorage
+    const saveDraft = () => {
+      const draft = {
+        description,
+        category,
+        brand,
+        condition,
+        location,
+        city,
+        price: price ? parseFloat(price) : 0,
+      };
+      localStorage.setItem('draft', JSON.stringify(draft));
+      setUploadMessage('Draft saved successfully!');
+    };
+  
+    // Load draft from localStorage
+    const loadDraft = () => {
+      const draft = localStorage.getItem('draft');
+      if (draft) {
+        const parsedDraft = JSON.parse(draft);
+        setDescription(parsedDraft.description);
+        setCategory(parsedDraft.category);
+        setBrand(parsedDraft.brand);
+        setCondition(parsedDraft.condition);
+        setLocation(parsedDraft.location);
+        setCity(parsedDraft.city);
+        setPrice(parsedDraft.price.toString());
+      }
+    };
+
+    // Error conditon
+    const [errors, setErrors] = useState({
+      photos: '',
+      description: '',
+      category: '',
+      brand: '',
+      condition: '',
+      price: ''
+    });
+  
+    useEffect(() => {
+      loadDraft();
+    }, []);
+
+      // Function to handle user activity
+  const handleUserActivity = () => {
+    if (inactivityTimeoutId) {
+      clearTimeout(inactivityTimeoutId); // Clear the existing timeout
+    }
+
+    // Set a new timeout for 4 minutes
+    const timeoutId = setTimeout(() => {
+      saveDraft(); // Save draft after 3 minutes of inactivity
+      console.log('Draft saved');
+    }, 180000); // 3 minutes
+
+    setInactivityTimeoutId(timeoutId); // Store the timeout ID
+  };
+
+  // Set up event listeners for user activity
+  useEffect(() => {
+    window.addEventListener('mousemove', handleUserActivity);
+    window.addEventListener('keypress', handleUserActivity);
+    // Clean up event listeners on component unmount
+    return () => {
+      window.removeEventListener('mousemove', handleUserActivity);
+      window.removeEventListener('keypress', handleUserActivity);
+      if (inactivityTimeoutId) {
+        clearTimeout(inactivityTimeoutId); // Clear timeout on unmount
+      }
+    };
+  }, [inactivityTimeoutId]);
 
   // Handle image upload on S3
   const handleFileChange = (index: number) => async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,13 +168,67 @@ const SellNow: React.FC = () => {
     };
 
       // 업로드 핸들러
-  const handleContinue = async () => {
+    const handleContinue = async () => {
+    // Reset all errors first
+    setErrors({
+      photos: '',
+      description: '',
+      category: '',
+      brand: '',
+      condition: '',
+      price: ''
+    });
+
+    let hasErrors = false;
+    const newErrors = {
+      photos: '',
+      description: '',
+      category: '',
+      brand: '',
+      condition: '',
+      price: ''
+    };
+
+    // Validate photos
     if (photos.length === 0) {
-      setUploadMessage('Please upload at least one photo.'); // 사진이 없을 경우 경고 메시지 표시
+      newErrors.photos = 'Please insert at least one image';
+      hasErrors = true;
+    }
+
+    // Validate required fields
+    if (!description.trim()) {
+      newErrors.description = 'This field is required';
+      hasErrors = true;
+    }
+
+    if (!category.trim()) {
+      newErrors.category = 'This field is required';
+      hasErrors = true;
+    }
+
+    if (!brand.trim()) {
+      newErrors.brand = 'This field is required';
+      hasErrors = true;
+    }
+
+    if (!condition.trim()) {
+      newErrors.condition = 'This field is required';
+      hasErrors = true;
+    }
+
+      // Price validation - check if price is empty, 0, or negative
+    if (!price || parseFloat(price) <= 0) {
+      newErrors.price = 'Please enter a valid price greater than 0';
+      hasErrors = true;
+    }
+    setErrors(newErrors);
+
+    if (hasErrors) {
       return;
     }
 
     try {
+      await apiClient.post('/api/auth/refresh');
       const bucketName = process.env.AWS_BUCKET_NAME as string;
 
       // 각 사진을 반복하면서 업로드 진행
@@ -110,7 +246,8 @@ const SellNow: React.FC = () => {
 
         // 데이터베이스에 업로드 기록 저장
         await apiClient.post('/api/auth/uploads', {
-          user_id,
+          user_id: userId,
+          is_google_user: isGoogleUser,
           photo_url: data.Location,
           description,
           category,
@@ -123,9 +260,27 @@ const SellNow: React.FC = () => {
       }
 
       setUploadMessage('Upload successful!');
+
+            // Reset fields
+            setPhotos(Array(8).fill(null));
+            setPreviewUrls(Array(8).fill(''));
+            setDescription('');
+            setCategory('');
+            setBrand('');
+            setCondition('');
+            setLocation('');
+            setCity('');
+            setPrice('');
+
+            // Clear the draft from localStorage
+            localStorage.removeItem('draft');
+      
+            // Redirect to SellNow page
+            router.push('/sell-now'); // Replace with the correct route if different
+
     } catch (error) {
       console.error('Error uploading files:', error);
-      setUploadMessage('Error during upload. Please try again.');
+      setUploadMessage('Error during upload. Please try again.'); 
     }
   };
 
@@ -175,6 +330,7 @@ const SellNow: React.FC = () => {
           </div>
         ))}
       </div>
+      {errors.photos && <p className="text-red-500 mb-6">{errors.photos}</p>}
 
       {/* Description Section */}
       <h2 className="text-2xl font-semibold mb-4 text-gray-700">Description</h2>
@@ -185,6 +341,7 @@ const SellNow: React.FC = () => {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
+      {errors.description && <p className="text-red-500 mb-6">{errors.description}</p>}
 
       {/* Info Section */}
       <h2 className="text-2xl font-semibold mb-4 text-gray-700">Info</h2>
@@ -197,6 +354,7 @@ const SellNow: React.FC = () => {
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         />
+        {errors.category && <p className="text-red-500 mb-2">{errors.category}</p>}
       </div>
 
       <div className="mb-6">
@@ -208,6 +366,7 @@ const SellNow: React.FC = () => {
           value={brand}
           onChange={(e) => setBrand(e.target.value)}
         />
+        {errors.brand && <p className="text-red-500 mb-2">{errors.brand}</p>}
       </div>
 
       <div className="mb-6">
@@ -219,6 +378,7 @@ const SellNow: React.FC = () => {
           value={condition}
           onChange={(e) => setCondition(e.target.value)}
         />
+        {errors.condition && <p className="text-red-500 mb-2">{errors.condition}</p>}
       </div>
 
       {/* Location Section */}
@@ -284,6 +444,8 @@ const SellNow: React.FC = () => {
           onChange={(e) => setPrice(e.target.value)}
         />
       </div>
+      {errors.price && <p className="text-red-500 mb-6">{errors.price}</p>}
+      
 
       <button
         className="bg-black text-white py-3 px-6 rounded-lg hover:bg-gray-800 transition duration-200 ease-in-out"
@@ -291,6 +453,12 @@ const SellNow: React.FC = () => {
       >
         Continue
       </button>
+      <button
+          className="bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition duration-200"
+          onClick={saveDraft}
+        >
+          Save Draft
+        </button>
 
       {uploadMessage && <p className="mt-4 text-red-500">{uploadMessage}</p>}
     </div>
