@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import apiClient from '@/app/utils/apiClient';
+import { useRouter } from 'next/navigation';
 
 interface Item {
   id: string;
@@ -14,12 +15,23 @@ interface Item {
 const TheDepopEdit: React.FC = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchRandomItems = async () => {
       try {
         const response = await apiClient.get('/api/items/random');
-        setItems(response.data.items);
+        console.log('Fetched items:', response.data.items); // 디버깅용
+
+        // 중복 제거
+        const uniqueItems = [...new Map(response.data.items.map((item: Item) => [item.id, item])).values()];
+        console.log('Unique items:', uniqueItems); // 디버깅용
+
+        // 정확히 7개만 필요하다면
+        const limitedItems = uniqueItems.slice(0, 7);
+        console.log('Limited items:', limitedItems); // 디버깅용
+
+        setItems(limitedItems);
       } catch (error) {
         console.error('Error fetching random items:', error);
       } finally {
@@ -29,6 +41,10 @@ const TheDepopEdit: React.FC = () => {
 
     fetchRandomItems();
   }, []);
+
+  const handleProductClick = (id: string) => {
+    router.push(`/products/${id}`);
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -42,10 +58,7 @@ const TheDepopEdit: React.FC = () => {
             <h2 className="text-2xl sm:text-3xl font-bold">The Depop Edit</h2>
             <p className="text-base sm:text-lg text-gray-600">Items we love, updated daily</p>
           </div>
-          <a
-            href="#see-more"
-            className="mt-4 sm:mt-0 text-gray-600 underline"
-          >
+          <a href="#see-more" className="mt-4 sm:mt-0 text-gray-600 underline">
             See more
           </a>
         </div>
@@ -53,7 +66,10 @@ const TheDepopEdit: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Mobile: Large Image */}
           {items[0] && (
-            <div className="md:hidden col-span-1 relative overflow-hidden group">
+            <div 
+              className="md:hidden col-span-1 relative overflow-hidden group cursor-pointer"
+              onClick={() => handleProductClick(items[0].id)}
+            >
               <img
                 src={items[0].photo_url}
                 alt={items[0].description}
@@ -70,7 +86,11 @@ const TheDepopEdit: React.FC = () => {
           {/* Mobile: 2x3 Image Grid */}
           <div className="md:hidden grid grid-cols-2 gap-4 col-span-1">
             {items.slice(1, 7).map((item) => (
-              <div key={item.id} className="relative overflow-hidden group">
+              <div 
+                key={item.id} 
+                className="relative overflow-hidden group cursor-pointer"
+                onClick={() => handleProductClick(item.id)}
+              >
                 <img
                   src={item.photo_url}
                   alt={item.description}
@@ -88,7 +108,11 @@ const TheDepopEdit: React.FC = () => {
           {/* Desktop: Left Side: 2x3 Images */}
           <div className="hidden md:grid md:col-span-2 grid-cols-3 gap-4">
             {items.slice(0, 6).map((item) => (
-              <div key={item.id} className="relative overflow-hidden group">
+              <div 
+                key={item.id} 
+                className="relative overflow-hidden group cursor-pointer"
+                onClick={() => handleProductClick(item.id)}
+              >
                 <img
                   src={item.photo_url}
                   alt={item.description}
@@ -105,7 +129,10 @@ const TheDepopEdit: React.FC = () => {
 
           {/* Desktop: Right Side: Large Image */}
           {items[6] && (
-            <div className="hidden md:block md:col-span-1 relative overflow-hidden group">
+            <div 
+              className="hidden md:block md:col-span-1 relative overflow-hidden group cursor-pointer"
+              onClick={() => handleProductClick(items[6].id)}
+            >
               <img
                 src={items[6].photo_url}
                 alt={items[6].description}
