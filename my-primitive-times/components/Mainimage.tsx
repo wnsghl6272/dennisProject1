@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
+import Image from 'next/image';
 
 const MainImage: React.FC = () => {
   const { t } = useTranslation();
@@ -13,10 +14,13 @@ const MainImage: React.FC = () => {
       <div className="relative w-full md:w-1/2 h-full">
         <Link href="/menswear" passHref>
           <div className="relative w-full h-full cursor-pointer">
-            <img
-              src="main2.jpg"
+            <Image
+              src="/main2.jpg"
               alt={t('menwear')}
               className="w-full h-full object-cover"
+              placeholder="blur"
+              blurDataURL='/data:image/webp;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII='
+              fill
             />
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center p-4">
@@ -36,10 +40,13 @@ const MainImage: React.FC = () => {
       <div className="relative w-full md:w-1/2 h-full">
         <Link href="/womenwear" passHref>
           <div className="relative w-full h-full cursor-pointer">
-            <img
-              src="main1.jpg"
+            <Image
+              src="/main1.jpg"
               alt={t('womenwear')}
               className="w-full h-full object-cover"
+              placeholder="blur"
+              blurDataURL='/data:image/webp;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII='
+              fill
             />
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center p-4">

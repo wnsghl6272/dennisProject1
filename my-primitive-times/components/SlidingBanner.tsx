@@ -1,6 +1,7 @@
 // components/SlidingBanner.tsx
 'use client';
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 
 const slides = [
   { src: '/banner/banner1.jpg', alt: 'Slide 1' },

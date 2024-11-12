@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import apiClient from '@/app/utils/apiClient';
+import Image from 'next/image';
 
 interface Product {
   id: string;
@@ -22,6 +23,8 @@ export default function ProductDetail() {
   const { id } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+
+
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -46,7 +49,7 @@ export default function ProductDetail() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Product Image */}
         <div>
-          <img
+          <Image
             src={product.photo_url}
             alt={product.description}
             className="w-full h-auto object-cover rounded-lg"

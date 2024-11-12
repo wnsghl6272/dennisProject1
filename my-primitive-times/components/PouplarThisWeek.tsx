@@ -1,6 +1,7 @@
 // components/PopularThisWeek.tsx
 'use client';
 import React, { useState } from 'react';
+import Image from 'next/image';
 
 const items = [
   { src: '/images/item1.jpg', title: 'Jumper', description: '+1k searches in the last week', link: '/jumper' },
@@ -42,10 +43,13 @@ const PopularItems: React.FC = () => {
                 >
                   {/* Image with Hover Effect */}
                   <div className="relative w-full h-60 overflow-hidden rounded-lg shadow-lg group">
-                    <img
+                    <Image
                       src={item.src}
                       alt={item.title}
                       className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-60"
+                      placeholder="blur"
+                      blurDataURL='/data:image/webp;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII='
+                      fill
                     />
                     {/* Hover Overlay */}
                     <div className="absolute inset-0 bg-gray-800 bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -77,10 +81,13 @@ const PopularItems: React.FC = () => {
               >
                 {/* Image with Hover Effect */}
                 <div className="relative w-full h-60 overflow-hidden rounded-lg shadow-lg group">
-                  <img
+                  <Image
                     src={item.src}
                     alt={item.title}
                     className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-60"
+                    placeholder="blur"
+                    blurDataURL='/data:image/webp;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII='
+                    fill
                   />
                   {/* Hover Overlay */}
                   <div className="absolute inset-0 bg-gray-800 bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity"></div>

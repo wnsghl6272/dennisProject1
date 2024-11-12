@@ -1,3 +1,9 @@
+import bundleAnalyzer from '@next/bundle-analyzer';
+
+const withBundleAnalyzer = bundleAnalyzer({
+    enabled: process.env.ANALYZE === 'false',
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     env: {
@@ -6,7 +12,9 @@ const nextConfig = {
       AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
       AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
     },
+
   };
-  
-  export default nextConfig;
+
+
+  export default withBundleAnalyzer(nextConfig);
   

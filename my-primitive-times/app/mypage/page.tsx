@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import apiClient from '../utils/apiClient';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface User {
   first_name: string;
