@@ -12,6 +12,7 @@ export async function GET(
     const query = `
       SELECT 
         uploads.*,
+        i.photo_url,
         CASE 
           WHEN users.google_id IS NOT NULL THEN users.name
           ELSE users.username
@@ -20,6 +21,8 @@ export async function GET(
       LEFT JOIN users ON 
         uploads.user_id = users.google_id OR 
         uploads.user_id = users.uuid::text
+      LEFT JOIN images i ON 
+        uploads.image_id = i.id  -- images 테이블과 조인
       WHERE uploads.id = $1
     `;
 

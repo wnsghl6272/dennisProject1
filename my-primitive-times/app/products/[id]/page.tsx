@@ -49,7 +49,7 @@ export default function ProductDetail() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Product Image */}
         <div>
-          <Image
+          <img
             src={product.photo_url}
             alt={product.description}
             className="w-full h-auto object-cover rounded-lg"

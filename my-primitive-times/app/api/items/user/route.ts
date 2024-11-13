@@ -19,10 +19,11 @@ export async function GET(req: NextRequest) {
     console.log('Decoded token:', decoded);
 
     const query = `
-      SELECT id, photo_url, description, category, brand, condition, location, city, price
-      FROM uploads
-      WHERE user_id = $1
-      ORDER BY created_at DESC
+      SELECT u.id, i.photo_url, u.description, u.category, u.brand, u.condition, u.location, u.city, u.price
+      FROM uploads u
+      LEFT JOIN images i ON u.image_id = i.id
+      WHERE u.user_id = $1
+      ORDER BY u.created_at DESC
     `;
 
     const { rows: items } = await pool.query(query, [decoded.id]);
