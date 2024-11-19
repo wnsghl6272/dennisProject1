@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import apiClient from '@/app/utils/apiClient';
 import Image from 'next/image';
 
@@ -21,6 +21,7 @@ interface Product {
 
 export default function ProductDetail() {
   const { id } = useParams();
+  const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -40,6 +41,34 @@ export default function ProductDetail() {
 
     fetchProduct();
   }, [id]);
+
+  const handleBuyNow = async () => {
+    const isLoggedIn = await checkLoginStatus();
+    if (!isLoggedIn) {
+      router.push('/login'); // 로그인 페이지
+    } else if (product) { // 
+      // 쿼리로 넘겨주기
+      const query = new URLSearchParams({
+        sellerName: product.seller_name,
+        productDescription: product.description,
+        productPrice: product.price,
+      }).toString();
+
+      router.push(`/checkout?${query}`); // 쿼리담아서 체크아웃페이지 넘김
+    } else {
+      console.error('Product is not available'); // Handle the case where product is null
+    }
+};
+
+  const checkLoginStatus = async () => {
+    try {
+      const response = await apiClient.get('/api/auth/check');
+      return response.data.isLogin;
+    } catch (error) {
+      console.error('Error checking login status:', error);
+      return false;
+    }
+  };
 
   if (loading) return <div>Loading...</div>;
   if (!product) return <div>Product not found</div>;
@@ -66,7 +95,9 @@ export default function ProductDetail() {
 
           {/* Action Buttons */}
           <div className="space-y-3">
-            <button className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors">
+            <button
+            onClick={handleBuyNow} 
+            className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors">
               Buy now
             </button>
             <button className="w-full border-2 border-black text-black py-3 rounded-lg hover:bg-gray-100 transition-colors">

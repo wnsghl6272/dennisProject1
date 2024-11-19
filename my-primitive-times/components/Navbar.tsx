@@ -58,7 +58,7 @@ const Navbar: React.FC = () => {
       <div className="container mx-auto px-4 py-2 flex items-center justify-between">
         {/* Left Section: Logo */}
         <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
-          <Image src="/logo.png" width={100} height={100} alt="Logo" className="h-8 mr-4" />
+          <Image src="/logo.webp" width={100} height={100} alt="Logo" className="h-8 mr-4" />
         </div>
 
         {/* Middle Section: Search bar */}
@@ -75,7 +75,7 @@ const Navbar: React.FC = () => {
           <ul className="flex items-center space-x-4">
             <li>
               <Image
-                src="/heart.png"
+                src="/heart.webp"
                 alt="Favorite"
                 width={40} 
                 height={40}
@@ -84,7 +84,7 @@ const Navbar: React.FC = () => {
             </li>
             <li>
               <Image
-                src="/bag.png"
+                src="/bag.webp"
                 alt="Shopping Cart"
                 width={40} 
                 height={40}

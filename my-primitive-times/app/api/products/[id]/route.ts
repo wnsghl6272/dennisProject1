@@ -11,7 +11,9 @@ export async function GET(
     // 제품과 사용자 정보를 함께 가져오는 쿼리
     const query = `
       SELECT 
-        uploads.*,
+        uploads.id,
+        uploads.description,
+        uploads.price,
         i.photo_url,
         CASE 
           WHEN users.google_id IS NOT NULL THEN users.name

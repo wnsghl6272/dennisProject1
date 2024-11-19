@@ -15,7 +15,7 @@ const MainImage: React.FC = () => {
         <Link href="/menswear" passHref>
           <div className="relative w-full h-full cursor-pointer">
             <Image
-              src="/main2.jpg"
+              src="/main2.webp"
               alt={t('menwear')}
               className="w-full h-full object-cover"
               placeholder="blur"
@@ -41,7 +41,7 @@ const MainImage: React.FC = () => {
         <Link href="/womenwear" passHref>
           <div className="relative w-full h-full cursor-pointer">
             <Image
-              src="/main1.jpg"
+              src="/main1.webp"
               alt={t('womenwear')}
               className="w-full h-full object-cover"
               placeholder="blur"
