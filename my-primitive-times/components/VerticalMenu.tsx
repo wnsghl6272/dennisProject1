@@ -1,6 +1,7 @@
 // components/VerticalMenu.tsx
 'use client';
 import React from 'react';
+import Image from 'next/image';
 
 const socialIcons = [
   { src: '/images/twitter-icon.png', alt: 'Twitter', link: 'https://twitter.com' },
@@ -45,7 +46,13 @@ const VerticalMenu: React.FC = () => {
         <div className="absolute bottom-4 right-4 flex space-x-4">
           {socialIcons.map((icon) => (
             <a key={icon.alt} href={icon.link} target="_blank" rel="noopener noreferrer">
-              <img src={icon.src} alt={icon.alt} className="w-8 h-8" />
+              <Image 
+              src={icon.src} 
+              alt={icon.alt} 
+              className="w-8 h-8" 
+              placeholder="blur"
+              blurDataURL='/data:image/webp;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII='
+              fill/>
             </a>
           ))}
         </div>

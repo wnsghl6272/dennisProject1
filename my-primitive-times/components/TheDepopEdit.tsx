@@ -21,17 +21,7 @@ const TheDepopEdit: React.FC = () => {
     const fetchRandomItems = async () => {
       try {
         const response = await apiClient.get('/api/items/random');
-        console.log('Fetched items:', response.data.items); // 디버깅용
-
-        // 중복 제거
-        const uniqueItems = [...new Map(response.data.items.map((item: Item) => [item.id, item])).values()];
-        console.log('Unique items:', uniqueItems); // 디버깅용
-
-        // 정확히 7개만 필요하다면
-        const limitedItems = uniqueItems.slice(0, 7);
-        console.log('Limited items:', limitedItems); // 디버깅용
-
-        setItems(limitedItems);
+        setItems(response.data.items);
       } catch (error) {
         console.error('Error fetching random items:', error);
       } finally {
@@ -46,8 +36,51 @@ const TheDepopEdit: React.FC = () => {
     router.push(`/products/${id}`);
   };
 
+  const SkeletonLoader = () => {
+    return (
+      <section className="w-full mt-16">
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Title Skeleton */}
+          <div className="flex flex-col sm:flex-row items-center justify-between mb-8">
+            <div className="animate-pulse">
+              <div className="h-8 w-48 bg-gray-200 rounded mb-2"></div>
+              <div className="h-5 w-36 bg-gray-200 rounded"></div>
+            </div>
+            <div className="mt-4 sm:mt-0 w-20 h-5 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+  
+          {/* Images Grid Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Mobile Skeleton */}
+            <div className="md:hidden space-y-4">
+              {/* Large Image Skeleton */}
+              <div className="w-full h-[200px] bg-gray-200 rounded animate-pulse"></div>
+              
+              {/* 2x3 Grid Skeleton */}
+              <div className="grid grid-cols-2 gap-4">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="w-full h-[200px] bg-gray-200 rounded animate-pulse"></div>
+                ))}
+              </div>
+            </div>
+  
+            {/* Desktop Skeleton */}
+            <div className="hidden md:grid md:col-span-2 grid-cols-3 gap-4">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="w-full h-[200px] bg-gray-200 rounded animate-pulse"></div>
+              ))}
+            </div>
+            <div className="hidden md:block md:col-span-1">
+              <div className="w-full h-full min-h-[400px] bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  };
+
   if (loading) {
-    return <div>Loading...</div>;
+    return <SkeletonLoader />;
   }
   return (
     <section className="w-full mt-16">

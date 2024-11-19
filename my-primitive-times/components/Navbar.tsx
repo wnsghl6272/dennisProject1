@@ -7,6 +7,7 @@ import apiClient from '../app/utils/apiClient';
 import { useAppDispatch, useAppSelector } from '../app/store/store';
 import { login, logout } from '../app/store/store';
 import { useTranslation } from 'react-i18next';
+import Image from 'next/image';
 
 const Navbar: React.FC = () => {
   const router = useRouter();
@@ -57,7 +58,7 @@ const Navbar: React.FC = () => {
       <div className="container mx-auto px-4 py-2 flex items-center justify-between">
         {/* Left Section: Logo */}
         <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
-          <img src="/logo.png" alt="Logo" className="h-8 mr-4" />
+          <Image src="/logo.webp" width={100} height={100} alt="Logo" className="h-8 mr-4" />
         </div>
 
         {/* Middle Section: Search bar */}
@@ -73,16 +74,20 @@ const Navbar: React.FC = () => {
         <div className="flex items-center space-x-4">
           <ul className="flex items-center space-x-4">
             <li>
-              <img
-                src="/heart.png"
+              <Image
+                src="/heart.webp"
                 alt="Favorite"
+                width={40} 
+                height={40}
                 className="w-6 h-6" // Adjust size as needed
               />
             </li>
             <li>
-              <img
-                src="/bag.png"
+              <Image
+                src="/bag.webp"
                 alt="Shopping Cart"
+                width={40} 
+                height={40}
                 className="w-6 h-6" // Adjust size as needed
               />
             </li>

@@ -1,6 +1,7 @@
 // components/ShopByStyle.tsx
 'use client';
 import React from 'react';
+import Image from 'next/image';
 
 const styles = [
   { src: '/images/style1.jpg', name: 'Cosquette' },
@@ -28,9 +29,12 @@ const ShopByStyle: React.FC = () => {
             >
               {/* Image with Hover Effect */}
               <div className="relative w-full h-60">
-                <img
+                <Image
                   src={style.src}
                   alt={style.name}
+                  placeholder="blur"
+                  blurDataURL='/data:image/webp;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII='
+                  fill
                   className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-60"
                 />
                 {/* Hover Overlay */}

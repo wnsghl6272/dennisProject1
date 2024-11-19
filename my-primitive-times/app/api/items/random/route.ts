@@ -6,16 +6,14 @@ export async function GET() {
     // 모든 제품을 가져오는 쿼리
     const query = `
       SELECT 
-        id, 
-        photo_url, 
-        description, 
-        brand, 
-        condition, 
-        price
-      FROM (
-        SELECT DISTINCT *
-        FROM uploads
-      ) AS unique_items
+        u.id, 
+        i.photo_url, 
+        u.description, 
+        u.brand, 
+        u.condition, 
+        u.price
+      FROM uploads u
+      LEFT JOIN images i ON u.image_id = i.id
       ORDER BY RANDOM()
       LIMIT 7
     `;
