@@ -96,50 +96,9 @@ const TheDepopEdit: React.FC = () => {
           </a>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Mobile: Large Image */}
-          {items[0] && (
-            <div 
-              className="md:hidden col-span-1 relative overflow-hidden group cursor-pointer"
-              onClick={() => handleProductClick(items[0].id)}
-            >
-              <img
-                src={items[0].photo_url}
-                alt={items[0].description}
-                className="w-full h-[200px] object-cover transition-transform duration-300 group-hover:scale-110"
-              />
-              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <p className="text-sm font-bold">${items[0].price}</p>
-                <p className="text-xs">{items[0].brand}</p>
-                <p className="text-xs">{items[0].condition}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Mobile: 2x3 Image Grid */}
-          <div className="md:hidden grid grid-cols-2 gap-4 col-span-1">
-            {items.slice(1, 7).map((item) => (
-              <div 
-                key={item.id} 
-                className="relative overflow-hidden group cursor-pointer"
-                onClick={() => handleProductClick(item.id)}
-              >
-                <img
-                  src={item.photo_url}
-                  alt={item.description}
-                  className="w-full h-[200px] object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <p className="text-sm font-bold">${item.price}</p>
-                  <p className="text-xs">{item.brand}</p>
-                  <p className="text-xs">{item.condition}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Desktop: Left Side: 2x3 Images */}
-          <div className="hidden md:grid md:col-span-2 grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-4">
+          {/* Left Side: 3 Columns and 3 Rows */}
+          <div className="col-span-2 grid grid-cols-3 gap-4">
             {items.slice(0, 6).map((item) => (
               <div 
                 key={item.id} 
@@ -147,7 +106,7 @@ const TheDepopEdit: React.FC = () => {
                 onClick={() => handleProductClick(item.id)}
               >
                 <img
-                  src={item.photo_url}
+                  src={item.photo_url} // Display the first image directly
                   alt={item.description}
                   className="w-full h-[200px] object-cover transition-transform duration-300 group-hover:scale-110"
                 />
@@ -158,26 +117,39 @@ const TheDepopEdit: React.FC = () => {
                 </div>
               </div>
             ))}
+
+            {/* Fill remaining spaces with empty images */}
+            {items.length < 6 && 
+              [...Array(6 - items.length)].map((_, i) => (
+                <div key={i} className="relative overflow-hidden group cursor-default">
+                  <div className="w-full h-[200px] bg-gray-200 rounded"></div>
+                </div>
+              ))
+            }
           </div>
 
-          {/* Desktop: Right Side: Large Image */}
-          {items[6] && (
-            <div 
-              className="hidden md:block md:col-span-1 relative overflow-hidden group cursor-pointer"
-              onClick={() => handleProductClick(items[6].id)}
-            >
-              <img
-                src={items[6].photo_url}
-                alt={items[6].description}
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-              />
-              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <p className="text-sm font-bold">${items[6].price}</p>
-                <p className="text-xs">{items[6].brand}</p>
-                <p className="text-xs">{items[6].condition}</p>
+          {/* Right Side: Large Image or Placeholder */}
+          <div className="col-span-1 relative overflow-hidden group cursor-default">
+            {items.length > 6 ? (
+              <div 
+                className="relative overflow-hidden group cursor-pointer"
+                onClick={() => handleProductClick(items[6].id)} // Use the 7th item for the large image
+              >
+                <img
+                  src={items[6].photo_url} // Display the first image directly
+                  alt={items[6].description}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <p className="text-sm font-bold">${items[6].price}</p>
+                  <p className="text-xs">{items[6].brand}</p>
+                  <p className="text-xs">{items[6].condition}</p>
+                </div>
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="w-full h-full bg-gray-200 rounded"></div> // Placeholder for the large image
+            )}
+          </div>
         </div>
       </div>
     </section>
