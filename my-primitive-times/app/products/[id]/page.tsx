@@ -76,10 +76,10 @@ export default function ProductDetail() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Product Image */}
+        {/* Product Images */}
         <div>
           <img
-            src={product.photo_url}
+            src={product.photo_url} // Display the single image
             alt={product.description}
             className="w-full h-auto object-cover rounded-lg"
           />
@@ -96,8 +96,9 @@ export default function ProductDetail() {
           {/* Action Buttons */}
           <div className="space-y-3">
             <button
-            onClick={handleBuyNow} 
-            className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors">
+              onClick={handleBuyNow}
+              className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors"
+            >
               Buy now
             </button>
             <button className="w-full border-2 border-black text-black py-3 rounded-lg hover:bg-gray-100 transition-colors">
@@ -127,12 +128,12 @@ export default function ProductDetail() {
               </span>
             </div>
             <div className="flex flex-col space-y-2 ml-13">
-          <button className="w-[200px] px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-center">
-            Visit shop
-          </button>
-          <button className="w-[200px] px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-center">
-            Ask a question
-          </button>
+              <button className="w-[200px] px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-center">
+                Visit shop
+              </button>
+              <button className="w-[200px] px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-center">
+                Ask a question
+              </button>
             </div>
           </div>
 

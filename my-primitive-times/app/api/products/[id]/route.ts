@@ -10,23 +10,28 @@ export async function GET(
 
     // 제품과 사용자 정보를 함께 가져오는 쿼리
     const query = `
-      SELECT 
+        SELECT 
         uploads.id,
         uploads.description,
         uploads.price,
+        uploads.brand,
+        uploads.category,
+        uploads.location,
+        uploads.city,
+        uploads.created_at,
         i.photo_url,
         CASE 
-          WHEN users.google_id IS NOT NULL THEN users.name
-          ELSE users.username
+            WHEN users.google_id IS NOT NULL THEN users.name
+            ELSE users.username
         END as seller_name
-      FROM uploads
-      LEFT JOIN users ON 
+    FROM uploads
+    LEFT JOIN users ON 
         uploads.user_id = users.google_id OR 
         uploads.user_id = users.uuid::text
-      LEFT JOIN images i ON 
-        uploads.image_id = i.id  -- images 테이블과 조인
-      WHERE uploads.id = $1
-    `;
+    LEFT JOIN products i ON 
+        uploads.product_id = i.product_id 
+    WHERE uploads.id = $1
+  `;
 
     const result = await db.query(query, [parseInt(params.id, 10)]);
     console.log('Query result:', result.rows);

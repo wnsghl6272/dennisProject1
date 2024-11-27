@@ -225,7 +225,7 @@ const SellNow: React.FC = () => {
         const bucketName = process.env.AWS_BUCKET_NAME as string;
 
         // Check if there are photos to upload
-        let uploadedImageUrl: string | null = null; // 업로드된 이미지 URL 저장
+        let uploadedImageUrls: string[] = []; // 업로드된 이미지 URL 저장
 
         // Upload each photo
         for (let i = 0; i < photos.length; i++) {
@@ -244,42 +244,46 @@ const SellNow: React.FC = () => {
                 };
 
                 const data = await s3.upload(params).promise(); // Upload file to S3
-                uploadedImageUrl = data.Location; // 업로드된 이미지 URL 저장
+                uploadedImageUrls.push(data.Location) // 업로드된 이미지 URL 저장
             }
         }
 
-        // 크롭된 이미지가 있을 경우 업로드
-        if (croppedImage) {
-            const blob = await fetch(croppedImage).then(res => res.blob());
-            const webpFile = new File([blob], `${uuidv4()}.webp`, { type: 'image/webp' });
+        // Check if there are uploaded images
+        if (uploadedImageUrls.length > 0) {
+          await apiClient.post('/api/auth/uploads', {
+              user_id: userId,
+              is_google_user: isGoogleUser,
+              description,
+              category,
+              brand,
+              condition,
+              location,
+              city,
+              price: price ? parseFloat(price) : 0,
+              photo_urls: uploadedImageUrls, // Send all uploaded image URLs
+          });
+      }
 
-            const webpFileName = `${uuidv4()}_${webpFile.name}`; // Add UUID to file name
-            const params = {
-                Bucket: bucketName,
-                Key: webpFileName,
-                Body: webpFile,
-                ContentType: webpFile.type,
-            };
+        // // 크롭된 이미지가 있을 경우 업로드
+        // if (croppedImage) {
+        //     const blob = await fetch(croppedImage).then(res => res.blob());
+        //     const webpFile = new File([blob], `${uuidv4()}.webp`, { type: 'image/webp' });
 
-            const data = await s3.upload(params).promise(); // Upload WebP file to S3
-            uploadedImageUrl = data.Location; // 크롭된 이미지 URL로 업데이트
-        }
+        //     const webpFileName = `${uuidv4()}_${webpFile.name}`; // Add UUID to file name
+        //     const params = {
+        //         Bucket: bucketName,
+        //         Key: webpFileName,
+        //         Body: webpFile,
+        //         ContentType: webpFile.type,
+        //     };
 
-        // Save upload record to database (원본 또는 크롭된 이미지 URL 사용)
-        if (uploadedImageUrl) {
-            await apiClient.post('/api/auth/uploads', {
-                user_id: userId,
-                is_google_user: isGoogleUser,
-                photo_url: uploadedImageUrl,
-                description,
-                category,
-                brand,
-                condition,
-                location,
-                city,
-                price: price ? parseFloat(price) : 0,
-            });
-        }
+        //     const data = await s3.upload(params).promise(); // Upload WebP file to S3
+        //     uploadedImageUrls.push(data.Location) // 크롭된 이미지 URL로 업데이트
+        // }
+
+
+        // Save each uploaded image URL to the uploads table with the same product_id
+
 
         // 업로드 성공 메시지 설정
         setUploadMessage('Upload successful!');

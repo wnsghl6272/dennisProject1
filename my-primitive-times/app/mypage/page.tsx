@@ -55,7 +55,6 @@ const MyPage = () => {
     
     fetchUserDetails();
     fetchUserItems();
-    setLoading(false);
   }, []);
 
   const handleProductClick = (id: string) => {
@@ -63,6 +62,10 @@ const MyPage = () => {
   };
 
   if (error) return <p>{error}</p>;
+
+  // Filter unique items based on their ID
+  const uniqueItems = Array.from(new Set(items.map(item => item.id)))
+    .map(id => items.find(item => item.id === id));
 
   const SkeletonLoader = () => {
     return (
@@ -150,26 +153,28 @@ const MyPage = () => {
         {/* User's Listed Items */}
         <div className="mt-10 border border-gray-300 p-6 text-center w-full">
           <p className="mb-4">Start selling today and turn your clothes into cash</p>
-          {items.length > 0 ? (
+          {uniqueItems.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {items.map((item) => (
-                <div 
-                  key={item.id} 
-                  className="border rounded-lg p-4 bg-white shadow-sm cursor-pointer hover:shadow-md transition-shadow duration-200"
-                  onClick={() => handleProductClick(item.id)}
-                >
-                  <img 
-                    src={item.photo_url} 
-                    alt={item.description} 
-                    className="w-full h-48 object-cover rounded-md mb-2" 
-                  />
-                  <h2 className="font-semibold text-lg">{item.description}</h2>
-                  <p className="text-gray-600">{item.brand}</p>
-                  <p className="text-gray-500">Category: {item.category}</p>
-                  <p className="text-gray-500">Condition: {item.condition}</p>
-                  <p className="text-gray-500">Location: {item.city}, {item.location}</p>
-                  <p className="text-black font-bold">${item.price}</p>
-                </div>
+              {uniqueItems.map((item) => (
+                item && ( // Ensure item is defined
+                  <div 
+                    key={item.id} 
+                    className="border rounded-lg p-4 bg-white shadow-sm cursor-pointer hover:shadow-md transition-shadow duration-200"
+                    onClick={() => handleProductClick(item.id)}
+                  >
+                    <img 
+                      src={item.photo_url} // Display the image directly
+                      alt={item.description} 
+                      className="w-full h-48 object-cover rounded-md mb-2" 
+                    />
+                    <h2 className="font-semibold text-lg">{item.description}</h2>
+                    <p className="text-gray-600">{item.brand}</p>
+                    <p className="text-gray-500">Category: {item.category}</p>
+                    <p className="text-gray-500">Condition: {item.condition}</p>
+                    <p className="text-gray-500">Location: {item.city}, {item.location}</p>
+                    <p className="text-black font-bold">${item.price}</p>
+                  </div>
+                )
               ))}
             </div>
           ) : (
@@ -186,7 +191,5 @@ const MyPage = () => {
     </div>
   );
 };
-
-
 
 export default MyPage;

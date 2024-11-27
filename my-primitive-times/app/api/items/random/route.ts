@@ -7,15 +7,16 @@ export async function GET() {
     const query = `
       SELECT 
         u.id, 
-        i.photo_url, 
+        MIN(i.photo_url) AS photo_url,  -- Select the first image for each product
         u.description, 
         u.brand, 
         u.condition, 
         u.price
-      FROM uploads u
-      LEFT JOIN images i ON u.image_id = i.id
-      ORDER BY RANDOM()
-      LIMIT 7
+    FROM uploads u
+    LEFT JOIN products i ON u.product_id = i.product_id
+    GROUP BY u.id, u.description, u.brand, u.condition, u.price
+    ORDER BY RANDOM()
+    LIMIT 7;
     `;
 
     const result = await db.query(query);

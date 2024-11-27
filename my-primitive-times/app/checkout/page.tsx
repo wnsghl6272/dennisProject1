@@ -1,12 +1,17 @@
+// app/checkout/page.tsx
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import apiClient from '@/app/utils/apiClient';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_YOUR_PUBLISHABLE_KEY!); // Replace with your actual publishable key
 
 const Checkout: React.FC = () => {
   const router = useRouter();
-  const searchParams = useSearchParams(); // Get search parameters
+  const searchParams = useSearchParams();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [country, setCountry] = useState('');
@@ -16,23 +21,17 @@ const Checkout: React.FC = () => {
   const [postalCode, setPostalCode] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [paymentType, setPaymentType] = useState('');
-  
-  // checkout product details
-  const [product, setProduct] = useState<{ seller_name: string; description: string; price: string } | null>(null);
-  
-  // credit card payment
-  const [cardNumber, setCardNumber] = useState('');
-  const [expirationDate, setExpirationDate] = useState('');
-  const [cvv, setCvv] = useState('');
   const [paymentStatus, setPaymentStatus] = useState('');
+  const [product, setProduct] = useState<{ seller_name: string; description: string; price: string } | null>(null);
+
+  const stripe = useStripe();
+  const elements = useElements();
 
   useEffect(() => {
     const sellerName = searchParams.get('sellerName');
     const productDescription = searchParams.get('productDescription');
     const productPrice = searchParams.get('productPrice');
 
-    // Set product details from search parameters for checkout
     if (sellerName && productDescription && productPrice) {
       setProduct({
         seller_name: sellerName,
@@ -42,31 +41,42 @@ const Checkout: React.FC = () => {
     }
   }, [searchParams]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    console.log({
-      firstName,
-      lastName,
-      country,
-      fullAddress,
-      city,
-      state,
-      postalCode,
-      email,
-      phoneNumber,
-      paymentType,
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!stripe || !elements) {
+      setPaymentStatus('Stripe.js has not loaded yet.');
+      return;
+    }
+
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+      setPaymentStatus('Card element not found.');
+      return;
+    }
+
+    const { error, paymentMethod } = await stripe.createPaymentMethod({
+      type: 'card',
+      card: cardElement,
     });
 
-    // Simulate payment processing
-    if (paymentType === 'credit_card') {
-      simulatePayment();
-    }
-  };
+    if (error) {
+      setPaymentStatus(`Payment failed: ${error.message}`);
+    } else {
+      if (product) { // Check if product is not null
+        const response = await apiClient.post('/api/stripePayment', {
+          paymentMethodId: paymentMethod.id,
+          amount: parseFloat(product.price) * 100, // Convert to cents
+        });
 
-  const simulatePayment = () => {
-    // Basic validation for credit card fields
-    if (!cardNumber || !expirationDate || !cvv) {
-      setPaymentStatus('Please fill in all credit card fields.');
-      return;
+        if (response.data.error) {
+          setPaymentStatus(`Payment failed: ${response.data.error}`);
+        } else {
+          setPaymentStatus('Payment successful! Thank you for your purchase.');
+        }
+      } else {
+        setPaymentStatus('Product information is missing.');
+      }
     }
   };
 
@@ -74,6 +84,7 @@ const Checkout: React.FC = () => {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Checkout</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Shipping Address Fields */}
         <h2 className="text-2xl font-semibold mb-4">Shipping Address</h2>
         <div>
           <label className="block mb-1">First Name</label>
@@ -166,68 +177,8 @@ const Checkout: React.FC = () => {
           />
         </div>
 
-        <h2 className="text-2xl font-semibold mb-4">Payment Type</h2>
-        <div>
-          <label className="block mb-1">Select Payment Type</label>
-          <select
-            value={paymentType}
-            onChange={(e) => setPaymentType(e.target.value)}
-            className="border-2 border-gray-300 rounded-lg w-full p-2"
-            required
-          >
-            <option value="">Select a payment type</option>
-            <option value="credit_card">Credit Card</option>
-            <option value="paypal">PayPal</option>
-            <option value="bank_transfer">Bank Transfer</option>
-          </select>
-        </div>
-
-        {/* Credit Card Fields */}
-        {paymentType === 'credit_card' && (
-          <div className="mt-4">
-            <h2 className="text-2xl font-semibold mb-2">Credit Card Information</h2>
-            <div>
-              <label className="block mb-1">Card Number</label>
-              <input
-                type="text"
-                value={cardNumber}
-                onChange={(e) => setCardNumber(e.target.value)}
-                className="border-2 border-gray-300 rounded-lg w-full p-2"
-                required
-              />
-            </div>
-            <div>
-              <label className="block mb-1">Expiration Date (MM/YY)</label>
-              <input
-                type="text"
-                value={expirationDate}
-                onChange={(e) => setExpirationDate(e.target.value)}
-                className="border-2 border-gray-300 rounded-lg w-full p-2"
-                required
-              />
-            </div>
-            <div>
-              <label className="block mb-1">CVV</label>
-              <input
-                type="text"
-                value={cvv}
-                onChange={(e) => setCvv(e.target.value)}
-                className="border-2 border-gray-300 rounded-lg w-full p-2"
-                required
-              />
-            </div>
-          </div>
-        )}
-
-        {/* New Section for Product Details */}
-        {product && (
-          <div className="mt-6 border-t border-gray-300 pt-4">
-            <h2 className="text-2xl font-semibold mb-2">Product Details</h2>
-            <p className="text-gray-800">Seller: {product.seller_name}</p>
-            <p className="text-gray-800">Description: {product.description}</p>
-            <p className="text-3xl font-bold">${product.price}</p>
-          </div>
-        )}
+        <h2 className="text-2xl font-semibold mb-4">Payment Information</h2>
+        <CardElement className="border-2 border-gray-300 rounded-lg w-full p-2" />
 
         <button
           type="submit"
@@ -243,8 +194,27 @@ const Checkout: React.FC = () => {
           </div>
         )}
       </form>
+
+      {/* Product Details Section */}
+      {product && (
+        <div className="mt-6 border-t border-gray-300 pt-4">
+          <h2 className="text-2xl font-semibold mb-2">Product Details</h2>
+          <p className="text-gray-800">Seller: {product.seller_name}</p>
+          <p className="text-gray-800">Description: {product.description}</p>
+          <p className="text-3xl font-bold">${product.price}</p>
+        </div>
+      )}
     </div>
   );
 };
 
-export default Checkout;
+// Wrap the Checkout component with Elements
+const CheckoutWrapper: React.FC = () => {
+  return (
+    <Elements stripe={stripePromise}>
+      <Checkout />
+    </Elements>
+  );
+};
+
+export default CheckoutWrapper;
