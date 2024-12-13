@@ -114,6 +114,17 @@ const Checkout: React.FC = () => {
           amount: parseFloat(product.price)  * 100,
           productId: product?.productId,
           userId: userId,
+          shippingInfo: {
+            first_name: firstName,
+            last_name: lastName,
+            address: fullAddress,
+            city: city,
+            state: state,
+            postal_code: postalCode,
+            country: country,
+            email: email,
+            phone_number: phoneNumber,
+          },
         });
 
         if (response.data.error) {

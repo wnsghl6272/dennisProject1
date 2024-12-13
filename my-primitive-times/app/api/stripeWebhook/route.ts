@@ -35,26 +35,28 @@ export async function POST(req: NextRequest) {
     const productId = paymentIntent.metadata.productId; // 체크아웃에서 가져옴
     const price = paymentIntent.amount; // 결제 금액 (센트 단위)
     const stripePaymentIntentId = paymentIntent.id; // Stripe Payment Intent ID
+    const shippingInfo = JSON.parse(paymentIntent.metadata.shippingInfo);
 
     if (!userId) {
         console.error('User ID is missing from payment intent metadata');
         return NextResponse.json({ error: 'User ID is missing' }, { status: 400 });
       }
-
+    
     // 주문 기록 추가
     try {
-      await db.query(
-        `INSERT INTO orders (user_id, product_id, price, payment_status, created_at, updated_at, stripe_payment_intent_id) 
-         VALUES ($1, $2, $3, $4, NOW(), NOW(), $5)`,
-        [userId, productId, price, 'successful', stripePaymentIntentId]
+      const result = await db.query(
+        `INSERT INTO orders (user_id, product_id, price, payment_status, created_at, updated_at, stripe_payment_intent_id, shipping_info) 
+         VALUES ($1, $2, $3, $4, NOW(), NOW(), $5, $6) RETURNING order_number`,
+        [userId, productId, price, 'successful', stripePaymentIntentId, shippingInfo]
       );
-      console.log('Order recorded successfully');
+
+      const orderNumber = result.rows[0].order_number;
+      console.log('Order recorded successfully with order number:', orderNumber);
     } catch (error) {
       console.error('Error recording order:', error);
       return NextResponse.json({ error: 'Failed to record order' }, { status: 500 });
     }
   }
 
-  // Return a response to acknowledge receipt of the event
   return NextResponse.json({ received: true });
 }

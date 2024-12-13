@@ -8,7 +8,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 });
 
 export async function POST(req: NextRequest) {
-  const { paymentMethodId, amount, productId, userId } = await req.json();
+  const { paymentMethodId, amount, productId, userId, shippingInfo } = await req.json();
 
   try {
     // 제품 가격 검증
@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
       metadata: {
         userId: userId,
         productId: productId,
+        shippingInfo: JSON.stringify(shippingInfo),
       },
     //   confirm: true,
     //   // Option 1: Provide a return_url for redirect-based payment methods
