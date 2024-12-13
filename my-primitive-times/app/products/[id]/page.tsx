@@ -6,6 +6,7 @@ import Image from 'next/image';
 
 interface Product {
   id: string;
+  product_id: string;
   photo_url: string;
   description: string;
   category: string;
@@ -46,12 +47,13 @@ export default function ProductDetail() {
     const isLoggedIn = await checkLoginStatus();
     if (!isLoggedIn) {
       router.push('/login'); // 로그인 페이지
-    } else if (product) { // 
+    } else if (product) { 
       // 쿼리로 넘겨주기
       const query = new URLSearchParams({
         sellerName: product.seller_name,
         productDescription: product.description,
         productPrice: product.price,
+        productId: product.product_id,
       }).toString();
 
       router.push(`/checkout?${query}`); // 쿼리담아서 체크아웃페이지 넘김
@@ -91,6 +93,7 @@ export default function ProductDetail() {
           <div className="mb-6">
             <p className="text-3xl font-bold">${product.price}</p>
             <p className="text-gray-600">Condition: {product.condition}</p>
+            <p className="text-gray-600">Product ID: {product.product_id}</p> 
           </div>
 
           {/* Action Buttons */}

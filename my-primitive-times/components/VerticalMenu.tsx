@@ -4,9 +4,9 @@ import React from 'react';
 import Image from 'next/image';
 
 const socialIcons = [
-  { src: '/images/twitter-icon.png', alt: 'Twitter', link: 'https://twitter.com' },
-  { src: '/images/instagram-icon.png', alt: 'Instagram', link: 'https://instagram.com' },
-  { src: '/images/tiktok-icon.png', alt: 'TikTok', link: 'https://tiktok.com' }
+  { src: '/twitter-icon.svg', alt: 'Twitter', link: 'https://twitter.com' },
+  { src: '/instagram-icon.svg', alt: 'Instagram', link: 'https://instagram.com' },
+  { src: '/tiktok-icon.svg', alt: 'TikTok', link: 'https://tiktok.com' }
 ];
 
 const VerticalMenu: React.FC = () => {
@@ -47,12 +47,14 @@ const VerticalMenu: React.FC = () => {
           {socialIcons.map((icon) => (
             <a key={icon.alt} href={icon.link} target="_blank" rel="noopener noreferrer">
               <Image 
-              src={icon.src} 
-              alt={icon.alt} 
-              className="w-8 h-8" 
-              placeholder="blur"
-              blurDataURL='/data:image/webp;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII='
-              fill/>
+                src={icon.src} 
+                alt={icon.alt} 
+                className="w-8 h-8" 
+                placeholder="blur"
+                blurDataURL='/data:image/webp;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII='
+                width={32}
+                height={32}
+              />
             </a>
           ))}
         </div>

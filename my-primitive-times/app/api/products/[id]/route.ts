@@ -12,6 +12,7 @@ export async function GET(
     const query = `
         SELECT 
         uploads.id,
+        uploads.product_id,
         uploads.description,
         uploads.price,
         uploads.brand,

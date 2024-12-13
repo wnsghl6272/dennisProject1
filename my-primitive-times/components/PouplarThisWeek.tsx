@@ -4,14 +4,14 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 
 const items = [
-  { src: '/images/item1.jpg', title: 'Jumper', description: '+1k searches in the last week', link: '/jumper' },
-  { src: '/images/item2.jpg', title: 'T-shirt', description: '+800 searches in the last week', link: '/t-shirt' },
-  { src: '/images/item3.jpg', title: 'Shoes', description: '+1.5k searches in the last week', link: '/shoes' },
-  { src: '/images/item4.jpg', title: 'Hat', description: '+500 searches in the last week', link: '/hat' },
-  { src: '/images/item5.jpg', title: 'Jacket', description: '+700 searches in the last week', link: '/jacket' },
-  { src: '/images/item6.jpg', title: 'Scarf', description: '+400 searches in the last week', link: '/scarf' },
-  { src: '/images/item7.jpg', title: 'Gloves', description: '+300 searches in the last week', link: '/gloves' },
-  { src: '/images/item8.jpg', title: 'Socks', description: '+600 searches in the last week', link: '/socks' },
+  { src: '/popularitems/aje.webp', title: 'Aje', description: '+1k searches in the last week', link: '/jumper' },
+  { src: '/popularitems/denimskirt.webp', title: 'Denim Skirt', description: '+800 searches in the last week', link: '/t-shirt' },
+  { src: '/popularitems/jeans.webp', title: 'Jeans', description: '+1.5k searches in the last week', link: '/shoes' },
+  { src: '/popularitems/maxidress.webp', title: 'Maxi Dress', description: '+500 searches in the last week', link: '/hat' },
+  { src: '/popularitems/sandal.webp', title: 'Sandal', description: '+700 searches in the last week', link: '/jacket' },
+  { src: '/popularitems/skims.webp', title: 'Skims', description: '+400 searches in the last week', link: '/scarf' },
+  { src: '/popularitems/sunglasses.webp', title: 'Sunglasses', description: '+300 searches in the last week', link: '/gloves' },
+  { src: '/popularitems/withjean.webp', title: 'With Jean', description: '+600 searches in the last week', link: '/socks' },
 ];
 
 const PopularItems: React.FC = () => {

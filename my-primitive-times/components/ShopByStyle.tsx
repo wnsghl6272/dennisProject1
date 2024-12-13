@@ -4,12 +4,12 @@ import React from 'react';
 import Image from 'next/image';
 
 const styles = [
-  { src: '/images/style1.jpg', name: 'Cosquette' },
-  { src: '/images/style2.jpg', name: 'Streetwear' },
-  { src: '/images/style3.jpg', name: 'Connect the dots' },
-  { src: '/images/style4.jpg', name: 'Grunge' },
-  { src: '/images/style5.jpg', name: 'Spectator style' },
-  { src: '/images/style6.jpg', name: 'Camo' },
+  { src: '/styleitems/style1.webp', name: '90s Minimalism' },
+  { src: '/styleitems/style2.webp', name: 'Romantic Summer' },
+  { src: '/styleitems/style3.webp', name: 'Gorpcore' },
+  { src: '/styleitems/style4.webp', name: 'Loungewear' },
+  { src: '/styleitems/style5.webp', name: 'Silver Glow' },
+  { src: '/styleitems/style6.webp', name: 'Party Sequins' },
 ];
 
 const ShopByStyle: React.FC = () => {

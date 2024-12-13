@@ -1,15 +1,36 @@
 // app/api/create-payment-intent.ts
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import db from '@/app/lib/db';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2024-10-28.acacia', // Update to the latest version you want to use
+  apiVersion: '2024-10-28.acacia',
 });
 
 export async function POST(req: NextRequest) {
-  const { paymentMethodId, amount } = await req.json();
+  const { paymentMethodId, amount, productId, userId, shippingInfo } = await req.json();
 
   try {
+    // 제품 가격 검증
+    const productQuery = `
+      SELECT price FROM uploads WHERE product_id = $1
+    `;
+    const productResult = await db.query(productQuery, [productId]);
+    
+    if (productResult.rows.length === 0) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    const productPrice = parseFloat(productResult.rows[0].price) * 100;
+
+    console.log('Requested Amount:', amount);
+    console.log('Database Product Price:', productPrice);
+    console.log('User ID:', userId);
+
+    if (amount !== productPrice) {
+      return NextResponse.json({ error: 'Price mismatch' }, { status: 400 });
+    }
+
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
       currency: 'aud',
@@ -19,6 +40,11 @@ export async function POST(req: NextRequest) {
         enabled: true,
         allow_redirects: 'never', // Prevent redirect-based payment methods
       },
+      metadata: {
+        userId: userId,
+        productId: productId,
+        shippingInfo: JSON.stringify(shippingInfo),
+      },
     //   confirm: true,
     //   // Option 1: Provide a return_url for redirect-based payment methods
     //   return_url: 'https://yourwebsite.com/return', // Replace with your actual return URL
@@ -27,7 +53,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, paymentIntent });
   } catch (error) {
-    // Type assertion to handle the error as an instance of Error
     if (error instanceof Error) {
       console.error('Error creating payment intent:', error.message);
       return NextResponse.json({ error: error.message }, { status: 500 });
