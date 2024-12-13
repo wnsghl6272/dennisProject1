@@ -86,57 +86,68 @@ const Checkout: React.FC = () => {
 
     if (!stripe || !elements) {
       setPaymentStatus('Stripe.js has not loaded yet.');
+      console.error('Stripe.js has not loaded yet.'); //로그
       return;
     }
 
     if (!validateForm()) {
       setPaymentStatus('Please fix the errors in the form.');
+      console.warn('Form validation failed:', errors); //로그
       return; // 유효성 검사 실패 시 제출 중단
     }
 
     const cardElement = elements.getElement(CardElement);
     if (!cardElement) {
       setPaymentStatus('Card element not found.');
+      console.error('Card element not found.');//로그
       return;
     }
 
-    const { error, paymentMethod } = await stripe.createPaymentMethod({
-      type: 'card',
-      card: cardElement,
-    });
-
-    if (error) {
-      setPaymentStatus(`Payment failed: ${error.message}`);
-    } else {
-      if (product) {
-        const response = await apiClient.post('/api/stripePayment', {
-          paymentMethodId: paymentMethod.id,
-          amount: parseFloat(product.price)  * 100,
-          productId: product?.productId,
-          userId: userId,
-          shippingInfo: {
-            first_name: firstName,
-            last_name: lastName,
-            address: fullAddress,
-            city: city,
-            state: state,
-            postal_code: postalCode,
-            country: country,
-            email: email,
-            phone_number: phoneNumber,
-          },
-        });
-
-        if (response.data.error) {
-          setPaymentStatus(`Payment failed: ${response.data.error}`);
-        } else {
-          setPaymentStatus('Payment successful! Thank you for your purchase.');
-
-          router.push('/payment-success');
-        }
+    try {
+      const { error, paymentMethod } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardElement,
+      });
+  
+      if (error) {
+        setPaymentStatus(`Payment failed: ${error.message}`);
+        console.error('Payment failed:', error.message); //로그
       } else {
-        setPaymentStatus('Product information is missing.');
+        if (product) {
+          const response = await apiClient.post('/api/stripePayment', {
+            paymentMethodId: paymentMethod.id,
+            amount: parseFloat(product.price) * 100,
+            productId: product?.productId,
+            userId: userId,
+            shippingInfo: {
+              first_name: firstName,
+              last_name: lastName,
+              address: fullAddress,
+              city: city,
+              state: state,
+              postal_code: postalCode,
+              country: country,
+              email: email,
+              phone_number: phoneNumber,
+            },
+          });
+  
+          if (response.data.error) {
+            setPaymentStatus(`Payment failed: ${response.data.error}`);
+            console.error('Payment API error:', response.data.error); //로그
+          } else {
+            setPaymentStatus('Payment successful! Thank you for your purchase.');
+            console.log('Payment successful for product ID:', product.productId); //로그
+            router.push('/payment-success');
+          }
+        } else {
+          setPaymentStatus('Product information is missing.');
+          console.warn('Product information is missing.'); //로그
+        }
       }
+    } catch (error) {
+      setPaymentStatus('An unexpected error occurred. Please try again.');
+      console.error('Unexpected error during payment processing:', error);//로그
     }
   };
 
