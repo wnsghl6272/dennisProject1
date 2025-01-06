@@ -57,6 +57,7 @@ const Checkout: React.FC = () => {
     fetchUser();
   }, [searchParams]);
 
+
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
     if (!firstName) newErrors.firstName = 'First name is required';

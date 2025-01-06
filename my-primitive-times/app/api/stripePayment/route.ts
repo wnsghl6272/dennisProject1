@@ -7,13 +7,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2024-10-28.acacia',
 });
 
-// 로그 기록
-const logPayment = async (userId: string, productId: string, amount: number, status: string, errorMessage?: string) => {
-  const query = `
-      INSERT INTO payment_logs (user_id, product_id, amount, status, error_message)
-      VALUES ($1, $2, $3, $4, $5)
-  `;
-  await db.query(query, [userId, productId, amount, status, errorMessage || null]);
+// 로그 기록 함수
+export const logPayment = async (userId: string, productId: string, amount: number, status: string, errorMessage?: string) => {
+    const query = `
+        INSERT INTO payment_logs (user_id, product_id, amount, status, error_message)
+        VALUES ($1, $2, $3, $4, $5)
+    `;
+    await db.query(query, [userId, productId, amount, status, errorMessage || null]);
 };
 
 export async function POST(req: NextRequest) {
@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
     
     if (productResult.rows.length === 0) {
       console.error('Product not found for ID:', productId); //로그
+      await logPayment(userId, productId, amount, 'failed', 'Product not found');
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
 
     if (amount !== productPrice) {
       console.error('Price mismatch:', { requestedAmount: amount, databasePrice: productPrice }); //로그
-      await logPayment(userId, productId, amount, 'failed', 'Price mismatch'); //로그기록
+      await logPayment(userId, productId, amount, 'failed', 'Price mismatch');
       return NextResponse.json({ error: 'Price mismatch' }, { status: 400 });
     }
 
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
     //   return_url: 'https://yourwebsite.com/return', // Replace with your actual return URL
 
     });
-    
+
     console.log('Payment successful:', { paymentIntentId: paymentIntent.id, userId });
     await logPayment(userId, productId, amount, 'successful'); // 성공 로그 기록
     return NextResponse.json({ success: true, paymentIntent });

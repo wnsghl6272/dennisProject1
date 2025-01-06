@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import apiClient from '@/app/utils/apiClient';
+import jwt from 'jsonwebtoken';
 import Image from 'next/image';
 
 interface Product {
@@ -25,7 +26,7 @@ export default function ProductDetail() {
   const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-
+  const [userId, setUserId] = useState<string | null>(null); // userId 상태 추가
 
 
   useEffect(() => {
@@ -40,7 +41,16 @@ export default function ProductDetail() {
       }
     };
 
+    const fetchUserId = () => {
+      const token = document.cookie.split('; ').find(row => row.startsWith('accessToken='));
+      if (token) {
+        const decoded: any = jwt.decode(token.split('=')[1]);
+        setUserId(decoded.id); // userId 설정
+      }
+    };
+
     fetchProduct();
+    fetchUserId();
   }, [id]);
 
   const handleBuyNow = async () => {
@@ -60,6 +70,25 @@ export default function ProductDetail() {
     } else {
       console.error('Product is not available'); // Handle the case where product is null
     }
+};
+
+const handleAddToBag = async () => {
+  const isLoggedIn = await checkLoginStatus();
+  if (!isLoggedIn) {
+    router.push('/login'); // 로그인 페이지
+  } else if (product) {
+    try {
+      await apiClient.post('/api/cart', {
+        userId: userId, // 로그인한 사용자 ID
+        productId: product.product_id,
+      });
+      console.log('Product added to cart successfully');
+    } catch (error) {
+      console.error('Error adding product to cart:', error);
+    }
+  } else {
+    console.error('Product is not available'); // Handle the case where product is null
+  }
 };
 
   const checkLoginStatus = async () => {
@@ -104,7 +133,9 @@ export default function ProductDetail() {
             >
               Buy now
             </button>
-            <button className="w-full border-2 border-black text-black py-3 rounded-lg hover:bg-gray-100 transition-colors">
+            <button
+            onClick={handleAddToBag} 
+            className="w-full border-2 border-black text-black py-3 rounded-lg hover:bg-gray-100 transition-colors">
               Add to bag
             </button>
             <button className="w-full border-2 border-black text-black py-3 rounded-lg hover:bg-gray-100 transition-colors">
