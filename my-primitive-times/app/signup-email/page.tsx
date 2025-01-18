@@ -68,7 +68,7 @@ const SignUpEmail: React.FC = () => {
       {/* Left half: Image (hidden on mobile) */}
       <div className="hidden md:block md:w-1/2 relative">
         <Image
-          src="/signupImg.png" // Replace with your image path
+          src="/signupImg.webp" // Replace with your image path
           alt="Sign up image"
           layout="fill"
           objectFit="cover"
