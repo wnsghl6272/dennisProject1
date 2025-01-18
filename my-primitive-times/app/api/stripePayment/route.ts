@@ -8,7 +8,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 });
 
 // 로그 기록 함수
-export const logPayment = async (userId: string, productId: string, amount: number, status: string, errorMessage?: string) => {
+const logPayment = async (userId: string, productId: string, amount: number, status: string, errorMessage?: string) => {
     const query = `
         INSERT INTO payment_logs (user_id, product_id, amount, status, error_message)
         VALUES ($1, $2, $3, $4, $5)
