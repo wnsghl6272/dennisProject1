@@ -6,7 +6,7 @@ import { generateTokens } from '@/app/lib/token';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const REDIRECT_URI = 'http://localhost:3000/api/auth/google/callback';
+const REDIRECT_URI = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google/callback`;
 
 const client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
 
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     headers.append('Set-Cookie', `refreshToken=${refreshToken}; HttpOnly; Path=/; Max-Age=604800`); // 7 days
 
     // Redirect to the home page or another page
-    return NextResponse.redirect('http://localhost:3000/', { headers });
+    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_API_URL}/`, { headers });
   } catch (error) {
     console.error('Error during Google OAuth:', (error as Error).message);
     return NextResponse.json({ error: `Authentication failed: ${(error as Error).message}` }, { status: 500 });
