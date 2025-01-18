@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { OAuth2Client } from 'google-auth-library';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const REDIRECT_URI = 'http://localhost:3000/api/auth/google/callback';
+const REDIRECT_URI = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google/callback`;
 
 const client = new OAuth2Client(CLIENT_ID, '', REDIRECT_URI);
 
