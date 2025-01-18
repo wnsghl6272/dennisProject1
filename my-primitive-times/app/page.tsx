@@ -18,10 +18,9 @@ export default function Home() {
       <Container1/>
       <Container2>
         <WebsiteBanner/>
-        <PopularThisWeek/>
+        <TheDepopEdit/>
         <ShopByPrice/>
         <ShopByStyle/>
-        <TheDepopEdit/>
       </Container2>
       <VerticalMenu/>
     </>

@@ -30,7 +30,11 @@ const Login: React.FC = () => {
       dispatch(login()); // Redux 상태 업데이트
       router.push('/'); // 홈 페이지로 리다이렉트
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Something went wrong');
+      const errorMessage = error.response?.data?.message || 'Username or password is wrong';
+      alert(errorMessage); // 팝업 메시지 표시
+      setError(errorMessage); // 상태 업데이트 (선택 사항)
+
+      return;
     }
   };
 
@@ -57,7 +61,7 @@ const Login: React.FC = () => {
         className="w-full flex items-center justify-center py-2 px-4 mb-4 border border-gray-300 rounded-lg hover:bg-gray-100"
       >
         <Image
-          src="/icons/google-icon.png"
+          src="/googleicon.webp"
           alt="Google Icon"
           width={24}
           height={24}
@@ -98,6 +102,13 @@ const Login: React.FC = () => {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
             required
           />
+        </div>
+
+                {/* Test Login Details */}
+                <div className="mb-4 text-center text-sm text-gray-600">
+          <p>Test Login:</p>
+          <p className="font-bold">Username: <span className="text-blue-500">testuser02</span></p>
+          <p className="font-bold">Password: <span className="text-blue-500">Test_0202</span></p>
         </div>
 
         {/* Forgot Password Link */}
