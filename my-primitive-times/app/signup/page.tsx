@@ -25,27 +25,13 @@ const SignUp: React.FC = () => {
           className="w-full flex items-center justify-center py-2 px-4 mb-4 border border-gray-300 rounded-lg hover:bg-gray-100"
         >
           <Image
-            src="/icons/google-icon.png"
+            src="/googleicon.webp"
             alt="Google Icon"
             width={24}
             height={24}
             className="mr-2"
           />
           Continue with Google
-        </button>
-
-        <button
-          className="w-full flex items-center justify-center py-2 px-4 mb-4 border border-gray-300 rounded-lg hover:bg-gray-100"
-          onClick={() => alert('Apple sign-in not yet implemented')}
-        >
-          <Image
-            src="/icons/apple-icon.png"
-            alt="Apple Icon"
-            width={24}
-            height={24}
-            className="mr-2"
-          />
-          Continue with Apple
         </button>
 
         <div className="flex items-center my-4">

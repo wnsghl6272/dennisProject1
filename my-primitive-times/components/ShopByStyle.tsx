@@ -24,7 +24,7 @@ const ShopByStyle: React.FC = () => {
           {styles.map((style, index) => (
             <a
               key={index}
-              href={`/style/${style.name.toLowerCase().replace(/\s+/g, '-')}`}
+              href={`/womenwear`}
               className="relative group overflow-hidden rounded-lg shadow-lg"
             >
               {/* Image with Hover Effect */}

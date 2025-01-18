@@ -2,6 +2,7 @@
 'use client';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import Link from 'next/link';
 
 const Menu: React.FC = () => {
   const { t } = useTranslation();
@@ -10,18 +11,21 @@ const Menu: React.FC = () => {
     <div className="border-b border-gray-200">
       <div className="container mx-auto px-4 py-2">
         <ul className="flex space-x-4">
-          <li>
-            <a href="#" className="text-gray-700 hover:text-gray-900">{t('menwear')}</a>
-          </li>
-          <li>
-            <a href="#" className="text-gray-700 hover:text-gray-900">{t('womenwear')}</a>
-          </li>
-          <li>
-            <a href="#" className="text-gray-700 hover:text-gray-900">{t('brands')}</a>
-          </li>
-          <li>
-            <a href="#" className="text-red-600 font-bold hover:text-red-800">{t('sale')}</a>
-          </li>
+        <li>
+          <Link href="/menswear" className="text-gray-700 hover:text-gray-900">
+            {t('menwear')}
+          </Link>
+        </li>
+        <li>
+          <Link href="/womenwear" className="text-gray-700 hover:text-gray-900">
+            {t('womenwear')}
+          </Link>
+        </li>
+        <li>
+          <Link href="/salewear" className="text-red-600 font-bold hover:text-red-800">
+            {t('sale')}
+          </Link>
+        </li>
         </ul>
       </div>
     </div>

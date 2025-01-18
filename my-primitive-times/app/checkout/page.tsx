@@ -1,6 +1,6 @@
 // app/checkout/page.tsx
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import apiClient from '@/app/utils/apiClient';
@@ -294,9 +294,11 @@ const Checkout: React.FC = () => {
 // Wrap the Checkout component with Elements
 const CheckoutWrapper: React.FC = () => {
   return (
-    <Elements stripe={stripePromise}>
-      <Checkout />
-    </Elements>
+    <Suspense fallback={<div>Loading...</div>}>
+      <Elements stripe={stripePromise}>
+        <Checkout />
+      </Elements>
+    </Suspense>
   );
 };
 

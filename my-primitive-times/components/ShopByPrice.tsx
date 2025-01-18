@@ -3,10 +3,10 @@
 import React from 'react';
 
 const priceCategories = [
-  { title: 'Under $10', link: '/under-10' },
-  { title: 'Under $20', link: '/under-20' },
-  { title: 'Under $50', link: '/under-50' },
-  { title: 'Under $100', link: '/under-100' },
+  { title: 'Under $10', link: '/shopbyprice/under10' },
+  { title: 'Under $20', link: '/shopbyprice/under20' },
+  { title: 'Under $50', link: '/shopbyprice/under50' },
+  { title: 'Under $100', link: '/shopbyprice/under100' },
 ];
 
 const ShopByPrice: React.FC = () => {
