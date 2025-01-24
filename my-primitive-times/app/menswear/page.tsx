@@ -2,9 +2,10 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 interface Product {
-  id: number;
+  id: number; // ID는 숫자형
   title: string;
   price: number;
   category: string; // 카테고리
@@ -14,6 +15,7 @@ interface Product {
 const Menswear: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter(); // router 초기화
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -44,7 +46,12 @@ const Menswear: React.FC = () => {
         ) : (
           products.map((product) => (
             <div key={product.id} className="border p-4 rounded">
-              <img src={product.image} alt={product.title} className="w-full h-48 object-cover" />
+              <img
+                src={product.image}
+                alt={product.title}
+                className="w-full h-48 object-cover cursor-pointer"
+                onClick={() => router.push(`/products/fakeapi/${product.id}`)} // 상품 클릭 시 fakeapi 상세 페이지로 이동
+              />
               <h2 className="text-xl font-semibold">{product.title}</h2>
               <p className="text-gray-700">${product.price}</p>
             </div>

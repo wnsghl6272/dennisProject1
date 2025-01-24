@@ -16,6 +16,7 @@ export async function GET(
         uploads.description,
         uploads.price,
         uploads.brand,
+        uploads.condition,
         uploads.category,
         uploads.location,
         uploads.city,

@@ -91,9 +91,6 @@ const TheDepopEdit: React.FC = () => {
             <h2 className="text-2xl sm:text-3xl font-bold">The Depop Edit</h2>
             <p className="text-base sm:text-lg text-gray-600">Items we love, updated daily</p>
           </div>
-          <a href="#see-more" className="mt-4 sm:mt-0 text-gray-600 underline">
-            See more
-          </a>
         </div>
 
         <div className="grid grid-cols-3 gap-4">
