@@ -55,14 +55,14 @@ const Navbar: React.FC = () => {
 
   return (
     <div className="bg-white border-b border-gray-200 shadow-sm">
-      <div className="container mx-auto px-4 py-2 flex items-center justify-between">
+      <div className="container mx-auto px-4 py-2 flex flex-col md:flex-row items-center justify-between">
         {/* Left Section: Logo */}
         <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
           <Image src="/logo.webp" width={100} height={100} alt="Logo" className="h-8 mr-4" />
         </div>
 
         {/* Middle Section: Search bar */}
-        <div className="flex-1 flex justify-center">
+        <div className="flex-1 flex justify-center mt-2 md:mt-0">
           <input
             type="text"
             placeholder={t('search')}
@@ -71,7 +71,7 @@ const Navbar: React.FC = () => {
         </div>
 
         {/* Right Section: Icons and Buttons */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 mt-2 md:mt-0">
           <ul className="flex items-center space-x-4">
             <li>
               <Image

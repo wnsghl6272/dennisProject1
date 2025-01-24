@@ -138,9 +138,6 @@ const handleAddToBag = async () => {
             className="w-full border-2 border-black text-black py-3 rounded-lg hover:bg-gray-100 transition-colors">
               Add to bag
             </button>
-            <button className="w-full border-2 border-black text-black py-3 rounded-lg hover:bg-gray-100 transition-colors">
-              Make offer
-            </button>
           </div>
 
           {/* Description Section */}

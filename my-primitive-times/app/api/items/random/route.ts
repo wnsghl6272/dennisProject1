@@ -6,17 +6,28 @@ export async function GET() {
     // 모든 제품을 가져오는 쿼리
     const query = `
       SELECT 
+
         u.id, 
         MIN(i.photo_url) AS photo_url,  -- Select the first image for each product
+
         u.description, 
+
         u.brand, 
+
         u.condition, 
+
         u.price
-    FROM uploads u
-    LEFT JOIN products i ON u.product_id = i.product_id
-    GROUP BY u.id, u.description, u.brand, u.condition, u.price
-    ORDER BY RANDOM()
-    LIMIT 7;
+
+      FROM uploads u
+
+      LEFT JOIN products i ON u.product_id = i.product_id
+
+      GROUP BY u.id, u.description, u.brand, u.condition, u.price
+
+      ORDER BY u.created_at DESC  -- 변경: 최근 아이템을 가져오기 위해 정렬 기준을 변경했습니다.
+
+      LIMIT 7;
+
     `;
 
     const result = await db.query(query);

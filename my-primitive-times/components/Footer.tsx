@@ -45,7 +45,7 @@ const Footer: React.FC = () => {
 
   return (
     <footer className="bg-gray-200 py-8 px-4">
-      <div className="max-w-7xl mx-auto flex justify-between items-center">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
         {/* Dropdown Menus */}
         <div className="flex space-x-4">
           {/* Location Dropdown */}
@@ -102,7 +102,7 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Menu on the Right Side */}
-        <div className="flex space-x-6">
+        <div className="flex space-x-6 mt-4 md:mt-0">
           <a href="#sitemaps" className="hover:underline">Sitemaps</a>
           <a href="#terms" className="hover:underline">Terms and Conditions</a>
           <a href="#privacy" className="hover:underline">Privacy</a>
