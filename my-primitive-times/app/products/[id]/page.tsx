@@ -75,19 +75,39 @@ export default function ProductDetail() {
 const handleAddToBag = async () => {
   const isLoggedIn = await checkLoginStatus();
   if (!isLoggedIn) {
-    router.push('/login'); // 로그인 페이지
-  } else if (product) {
-    try {
-      await apiClient.post('/api/cart', {
-        userId: userId, // 로그인한 사용자 ID
-        productId: product.product_id,
-      });
-      console.log('Product added to cart successfully');
-    } catch (error) {
-      console.error('Error adding product to cart:', error);
+    router.push('/login');
+    return;
+  }
+
+  if (!product) {
+    console.error('Product is not available');
+    return;
+  }
+
+  try {
+    // 현재 로그인한 사용자 정보 가져오기
+    const userResponse = await apiClient.get('/api/auth/user');
+    const userId = userResponse.data.user.id || userResponse.data.user.uuid;
+
+    if (!userId) {
+      console.error('User ID not found');
+      router.push('/login');
+      return;
     }
-  } else {
-    console.error('Product is not available'); // Handle the case where product is null
+
+    // 장바구니에 추가
+    const response = await apiClient.post('/api/cart', {
+      userId: userId,
+      productId: product.product_id
+    });
+
+    if (response.status === 201) {
+      // 성공 메시지 표시 (선택사항)
+      alert('Item added to cart successfully');
+    }
+  } catch (error) {
+    console.error('Error adding product to cart:', error);
+    alert('Failed to add item to cart');
   }
 };
 
