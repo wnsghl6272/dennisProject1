@@ -88,7 +88,8 @@ const Navbar: React.FC = () => {
                 alt="Shopping Cart"
                 width={40} 
                 height={40}
-                className="w-6 h-6" // Adjust size as needed
+                className="w-6 h-6 cursor-pointer" // Adjust size as needed
+                onClick={() => handleNavigation('/cart')}
               />
             </li>
           </ul>

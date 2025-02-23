@@ -7,6 +7,16 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2024-10-28.acacia',
 });
 
+interface CartItem {
+  product_id: string;
+  price: string;
+}
+
+interface SimplifiedCartItem {
+  productId: string;
+  price: string;
+}
+
 // 로그 기록 함수
 const logPayment = async (userId: string, productId: string, amount: number, status: string, errorMessage?: string) => {
     const query = `
@@ -17,66 +27,81 @@ const logPayment = async (userId: string, productId: string, amount: number, sta
 };
 
 export async function POST(req: NextRequest) {
-  const { paymentMethodId, amount, productId, userId, shippingInfo } = await req.json();
+  const { paymentMethodId, amount, userId, fromCart, cartItems, productId, shippingInfo } = await req.json();
+  
   try {
-    console.log('Payment request received:', { paymentMethodId, amount, productId, userId }); //로그
+    console.log('Payment request received:', { paymentMethodId, amount, userId, fromCart });
 
-    // 제품 가격 검증
-    const productQuery = `
-      SELECT price FROM uploads WHERE product_id = $1
-    `;
-    const productResult = await db.query(productQuery, [productId]);
-    
-    if (productResult.rows.length === 0) {
-      console.error('Product not found for ID:', productId); //로그
-      await logPayment(userId, productId, amount, 'failed', 'Product not found');
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    // 장바구니 결제인 경우
+    if (fromCart && cartItems) {
+      // 필요한 정보만 추출
+      const simplifiedCartItems = cartItems.map((item: CartItem) => ({
+        productId: item.product_id,
+        price: item.price
+      }));
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'aud',
+        payment_method: paymentMethodId,
+        confirm: true,
+        automatic_payment_methods: {
+          enabled: true,
+          allow_redirects: 'never',
+        },
+        metadata: {
+          userId,
+          fromCart: 'true',
+          cartItemIds: simplifiedCartItems.map((item: SimplifiedCartItem) => item.productId).join(','),
+          shippingInfo: JSON.stringify(shippingInfo)
+        },
+      });
+
+      // 각 상품별로 결제 로그 기록
+      for (const item of simplifiedCartItems) {
+        await logPayment(userId, item.productId, parseFloat(item.price) * 100, 'successful');
+      }
+
+      // 장바구니 비우기
+      await db.query('DELETE FROM cart WHERE user_id = $1', [userId]);
+
+      return NextResponse.json({ clientSecret: paymentIntent.client_secret });
+    } 
+    // 단일 상품 결제인 경우 (기존 로직)
+    else if (productId) {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'aud',
+        payment_method: paymentMethodId,
+        confirm: true,
+        automatic_payment_methods: {
+          enabled: true,
+          allow_redirects: 'never',
+        },
+        metadata: {
+          userId,
+          productId,
+          shippingInfo: JSON.stringify(shippingInfo)
+        },
+      });
+
+      // 단일 상품 결제 로그 기록
+      await logPayment(userId, productId, amount, 'successful');
+
+      return NextResponse.json({ clientSecret: paymentIntent.client_secret });
     }
 
-    const productPrice = parseFloat(productResult.rows[0].price) * 100;
-
-    console.log('Requested Amount:', amount);
-    console.log('Database Product Price:', productPrice);
-    console.log('User ID:', userId);
-
-    if (amount !== productPrice) {
-      console.error('Price mismatch:', { requestedAmount: amount, databasePrice: productPrice }); //로그
-      await logPayment(userId, productId, amount, 'failed', 'Price mismatch');
-      return NextResponse.json({ error: 'Price mismatch' }, { status: 400 });
+    return NextResponse.json({ error: 'Invalid request parameters' }, { status: 400 });
+  } catch (error: any) {
+    console.error('Payment error:', error);
+    // 결제 실패 시 로그 기록
+    if (fromCart && cartItems) {
+      for (const item of cartItems) {
+        await logPayment(userId, item.product_id, parseFloat(item.price) * 100, 'failed', error.message);
+      }
+    } else if (productId) {
+      await logPayment(userId, productId, amount, 'failed', error.message);
     }
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount,
-      currency: 'aud',
-      payment_method: paymentMethodId,
-      confirm: true,
-      automatic_payment_methods: {
-        enabled: true,
-        allow_redirects: 'never', // Prevent redirect-based payment methods
-      },
-      metadata: {
-        userId: userId,
-        productId: productId,
-        shippingInfo: JSON.stringify(shippingInfo),
-      },
-    //   confirm: true,
-    //   // Option 1: Provide a return_url for redirect-based payment methods
-    //   return_url: 'https://yourwebsite.com/return', // Replace with your actual return URL
-
-    });
-
-    console.log('Payment successful:', { paymentIntentId: paymentIntent.id, userId });
-    await logPayment(userId, productId, amount, 'successful'); // 성공 로그 기록
-    return NextResponse.json({ success: true, paymentIntent });
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error creating payment intent:', error.message);
-      await logPayment(userId, productId, amount, 'failed', error.message); // 에러 로그 기록
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    } else {
-      console.error('Unexpected error:', error);
-      await logPayment(userId, productId, amount, 'failed', 'An unexpected error occurred'); // 예기치 않은 에러 로그 기록
-      return NextResponse.json({ error: 'An unexpected error occurred.' }, { status: 500 });
-    }
+    return NextResponse.json({ error: 'Payment failed' }, { status: 500 });
   }
 }
